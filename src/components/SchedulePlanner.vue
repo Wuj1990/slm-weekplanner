@@ -218,11 +218,11 @@ const exportStudentPDF = () => {
     <div v-if="!currentUser.isAdmin && currentUser.levelGroups" class="student-levels-banner">
       <h3>Jouw Niveaugroepen</h3>
       <div class="student-levels-grid">
-        <div v-for="(subj, icon) in { mechanica: '⚙️', elektriciteit: '⚡', tekenen: '📐' }" :key="subj" class="level-card-item">
+        <div v-for="(subj, icon) in { mechanica: '⚙️', elektriciteit: '⚡', 'technisch tekenen': '📐' }" :key="subj" class="level-card-item">
           <span class="vak-icon">{{ icon }}</span>
           <div>
             <span class="vak-name">{{ subj.charAt(0).toUpperCase() + subj.slice(1) }}</span>
-            <div class="vak-level">{{ currentUser.levelGroups[subj] || 'Nog niet ingedeeld' }}</div>
+            <div class="vak-level">{{ currentUser.levelGroups[subj] || currentUser.levelGroups['tekenen'] || 'Nog niet ingedeeld' }}</div>
           </div>
         </div>
       </div>
@@ -441,4 +441,3 @@ const exportStudentPDF = () => {
 .modal-actions-flex { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0; }
 .right-actions { display: flex; gap: 0.6rem; }
 </style>
-```[cite: 7]
