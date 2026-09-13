@@ -220,8 +220,8 @@ const exportStudentPDF = () => {
       <div class="student-levels-grid">
         <div v-for="(subj, icon) in { mechanica: '⚙️', elektriciteit: '⚡', 'technisch tekenen': '📐' }" :key="subj" class="level-card-item">
           <span class="vak-icon">{{ icon }}</span>
-          <div>
-            <span class="vak-name">{{ subj.charAt(0).toUpperCase() + subj.slice(1) }}</span>
+          <div class="vak-info">
+            <span class="vak-name">{{ subj }}</span>
             <div class="vak-level">{{ currentUser.levelGroups[subj] || currentUser.levelGroups['tekenen'] || 'Nog niet ingedeeld' }}</div>
           </div>
         </div>
@@ -383,6 +383,80 @@ const exportStudentPDF = () => {
 </template>
 
 <style scoped>
+/* Strakke styling voor Niveaugroepen Banner */
+.student-levels-banner {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.student-levels-banner h3 {
+  margin: 0 0 0.85rem 0;
+  font-size: 1.05rem;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.student-levels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.level-card-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #2563eb;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.vak-icon {
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eff6ff;
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.vak-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.vak-name {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vak-level {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-top: 0.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Rest van de stijlen */
 .header-right-actions { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
 .btn-copy-week { padding: 0.35rem 0.8rem; font-size: 0.85rem; font-weight: 700; cursor: pointer; }
 .capacity-indicator { font-size: 0.7rem; color: #64748b; font-weight: 500; }
