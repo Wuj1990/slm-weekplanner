@@ -25,18 +25,17 @@ watch(() => props.selectedWeek, (val) => {
   if (val) newWeek.value = val
 }, { immediate: true })
 
-// Filter enkel de onderdelen van de momenteel geselecteerde week
+// Filter enkel de onderdelen van de week die je hier in het formulier kiest (newWeek)
 const filteredActivities = computed(() => {
-  if (!props.selectedWeek) return props.activities
+  const targetWeek = newWeek.value || props.selectedWeek
+  if (!targetWeek) return props.activities
   return props.activities.filter(act => {
     const w = String(act.week || '').trim()
-    return w === 'Alle weken' || w === String(props.selectedWeek).trim()
+    return w === 'Alle weken' || w === String(targetWeek).trim()
   })
 })
 
 const handleAdd = async () => {
-  console.log('handleAdd is aangeroepen. Naam:', newName.value)
-  
   if (!newName.value.trim()) {
     alert('Vul alstublieft een naam in voor het onderdeel.')
     return
@@ -50,18 +49,17 @@ const handleAdd = async () => {
     maxHours: Number(newMaxHours.value) || 2,
     prerequisiteId: newPrerequisiteId.value || '',
     description: newDescription.value.trim() || 'Geen beschrijving',
-    week: newWeek.value || props.selectedWeek
+    week: newWeek.value
   }
 
   try {
-    console.log('Bezig met wegschrijven naar Firebase...', payload)
     await addActivityToFirebase(payload)
     alert('Onderdeel succesvol opgeslagen in Firebase database!')
     newName.value = ''
     newPrerequisiteId.value = ''
     newDescription.value = ''
   } catch (err) {
-    console.error('Fout in catch:', err)
+    console.error(err)
     alert('Fout bij opslaan in database: ' + err.message)
   }
 }
@@ -94,7 +92,6 @@ const handleUpdate = (act) => {
 
         <div class="form-group">
           <label>Naam Onderdeel:</label>
-          <!-- 'required' tijdelijk verwijderd zodat de browser submit nooit blokkeert -->
           <input v-model="newName" type="text" placeholder="bv. Instructieles" class="input-field" />
         </div>
 
@@ -143,9 +140,9 @@ const handleUpdate = (act) => {
       </form>
     </section>
 
-    <!-- BESTAANDE ONDERDELEN BEHEREN (GEFILTERD OP HUIDIGE WEEK) -->
+    <!-- BESTAANDE ONDERDELEN BEHEREN (GEFILTERD OP DE GEKOZEN DOELWEEK) -->
     <section class="admin-card">
-      <h3>📋 Onderdelen in {{ selectedWeek }}</h3>
+      <h3>📋 Onderdelen in {{ newWeek }}</h3>
 
       <div class="table-responsive">
         <table class="manage-table">
@@ -210,7 +207,7 @@ const handleUpdate = (act) => {
             </tr>
 
             <tr v-if="filteredActivities.length === 0">
-              <td colspan="9" class="empty-state">Geen onderdelen gevonden in {{ selectedWeek }}. (Blanco)</td>
+              <td colspan="9" class="empty-state">Geen onderdelen gevonden in {{ newWeek }}. (Blanco)</td>
             </tr>
           </tbody>
         </table>
