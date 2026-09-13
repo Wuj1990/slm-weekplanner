@@ -77,7 +77,6 @@ onMounted(() => {
     return
   }
 
-  // Fallback timer zodat het laadscherm nooit langer dan 1.5 seconde blijft hangen
   const safetyTimeout = setTimeout(() => {
     if (isLoading.value) {
       isLoading.value = false
@@ -98,6 +97,7 @@ onMounted(() => {
     checkAllLoaded()
   }, () => checkAllLoaded())
 
+  // Altijd direct toewijzen zodat nieuwe onderdelen meteen zichtbaar worden in de app
   onSnapshot(collection(db, 'activities'), s => {
     activities.value = s.docs.map(d => ({ id: d.id, ...d.data() }))
     checkAllLoaded()
