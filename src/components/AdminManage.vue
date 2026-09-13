@@ -58,7 +58,9 @@ const handleUpdate = (act) => {
           <label>Week:</label>
           <select v-model="newWeek" class="input-field">
             <option value="Alle weken">📅 Alle weken (Algemeen)</option>
-            <option v-for="wk in availableWeeks" :key="wk" :value="wk">{{ wk }}</option>
+            <option v-for="wk in availableWeeks" :key="wk.id || wk" :value="wk.id || wk">
+              {{ wk.label || wk }}
+            </option>
           </select>
         </div>
 
@@ -121,7 +123,7 @@ const handleUpdate = (act) => {
           <thead>
             <tr>
               <th style="width: 70px;">Kleur</th>
-              <th style="width: 130px;">Week</th>
+              <th style="width: 160px;">Week</th>
               <th style="width: 160px;">Naam Onderdeel</th>
               <th style="width: 120px;">Categorie</th>
               <th style="width: 70px;">Max/Slot</th>
@@ -139,7 +141,9 @@ const handleUpdate = (act) => {
               <td>
                 <select v-model="act.week" class="table-select" @change="handleUpdate(act)">
                   <option value="Alle weken">Alle weken</option>
-                  <option v-for="wk in availableWeeks" :key="wk" :value="wk">{{ wk }}</option>
+                  <option v-for="wk in availableWeeks" :key="wk.id || wk" :value="wk.id || wk">
+                    {{ wk.label || wk }}
+                  </option>
                 </select>
               </td>
               <td>
@@ -187,7 +191,6 @@ const handleUpdate = (act) => {
 </template>
 
 <style scoped>
-/* Behoud je bestaande stijlen */
 .admin-card h3 {
   margin: 0 0 1.25rem 0;
   font-size: 1.1rem;
