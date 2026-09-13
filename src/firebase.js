@@ -2,7 +2,7 @@
 import { initializeApp } from 'firebase/app'
 import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDocs, getDoc, setDoc, query, where, onSnapshot } from 'firebase/firestore'
 
-// Let op: zorg dat je eigen Firebase config hier correct staat ingesteld
+// Controleer of deze gegevens correct ingevuld zijn met jouw echte Firebase projectgegevens!
 const firebaseConfig = {
   apiKey: "JOUW_API_KEY",
   authDomain: "JOUW_AUTH_DOMAIN",
@@ -23,9 +23,11 @@ try {
 export const getDb = () => db
 export const getTools = () => ({ collection, addDoc, updateDoc, deleteDoc, doc, getDocs, getDoc, setDoc, query, where, onSnapshot })
 
-// 1. Activiteiten toevoegen (inclusief week synchronisatie)
+// 1. Activiteiten toevoegen met strenge controle op `db`
 export const addActivityToFirebase = async (activityData) => {
-  if (!db) return
+  if (!db) {
+    throw new Error("Firebase database is niet gekoppeld! Controleer je firebaseConfig sleutels in src/firebase.js.")
+  }
   return await addDoc(collection(db, 'activities'), {
     name: activityData.name,
     color: activityData.color,
@@ -40,7 +42,7 @@ export const addActivityToFirebase = async (activityData) => {
 
 // 2. Activiteiten bijwerken
 export const updateActivityInFirebase = async (activityData) => {
-  if (!db || !activityData.id) return
+  if (!db || !activityData.id) throw new Error("Firebase database niet beschikbaar of geen ID.")
   const docRef = doc(db, 'activities', activityData.id)
   return await updateDoc(docRef, {
     name: activityData.name,
@@ -55,12 +57,12 @@ export const updateActivityInFirebase = async (activityData) => {
 }
 
 export const deleteActivityFromFirebase = async (id) => {
-  if (!db) return
+  if (!db) throw new Error("Firebase database niet beschikbaar.")
   return await deleteDoc(doc(db, 'activities', id))
 }
 
 export const registerUserInFirebase = async (userData) => {
-  if (!db) return null
+  if (!db) throw new Error("Firebase database niet beschikbaar.")
   const userRef = doc(db, 'users', userData.email.toLowerCase().trim())
   await setDoc(userRef, userData, { merge: true })
   return userData
