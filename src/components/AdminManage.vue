@@ -35,7 +35,12 @@ const filteredActivities = computed(() => {
 })
 
 const handleAdd = async () => {
-  if (!newName.value.trim()) return
+  console.log('handleAdd is aangeroepen. Naam:', newName.value)
+  
+  if (!newName.value.trim()) {
+    alert('Vul alstublieft een naam in voor het onderdeel.')
+    return
+  }
 
   const payload = {
     name: newName.value.trim(),
@@ -49,13 +54,14 @@ const handleAdd = async () => {
   }
 
   try {
+    console.log('Bezig met wegschrijven naar Firebase...', payload)
     await addActivityToFirebase(payload)
     alert('Onderdeel succesvol opgeslagen in Firebase database!')
     newName.value = ''
     newPrerequisiteId.value = ''
     newDescription.value = ''
   } catch (err) {
-    console.error(err)
+    console.error('Fout in catch:', err)
     alert('Fout bij opslaan in database: ' + err.message)
   }
 }
@@ -88,7 +94,8 @@ const handleUpdate = (act) => {
 
         <div class="form-group">
           <label>Naam Onderdeel:</label>
-          <input v-model="newName" type="text" placeholder="bv. Instructieles" required class="input-field" />
+          <!-- 'required' tijdelijk verwijderd zodat de browser submit nooit blokkeert -->
+          <input v-model="newName" type="text" placeholder="bv. Instructieles" class="input-field" />
         </div>
 
         <div class="form-group">
