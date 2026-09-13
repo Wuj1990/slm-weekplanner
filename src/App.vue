@@ -97,7 +97,6 @@ onMounted(() => {
     checkAllLoaded()
   }, () => checkAllLoaded())
 
-  // Altijd direct toewijzen zodat nieuwe onderdelen meteen zichtbaar worden in de app
   onSnapshot(collection(db, 'activities'), s => {
     activities.value = s.docs.map(d => ({ id: d.id, ...d.data() }))
     checkAllLoaded()
@@ -249,7 +248,16 @@ watch(selectedWeek, val => localStorage.setItem('slm_selectedWeek', JSON.stringi
     <AuthView v-if="!currentUser || authView === 'change-password'" :auth-view="authView" :current-user="currentUser" :auth-error="authError" :auth-success="authSuccess" @login="handleLogin" @register="handleRegister" @navigate="handleNavigate" />
 
     <template v-else>
-      <AdminManage v-if="currentUser.isAdmin && activeTab === 'activities_manage'" :activities="activities" :available-weeks="availableWeeks" v-model:selected-week="selectedWeek" @add-activity="(a) => { addActivityToFirebase(a); showToast('Onderdeel toegevoegd!'); }" @update-activity="(a) => { updateActivityInFirebase(a); showToast('Onderdeel bijgewerkt!'); }" @delete-activity="(id) => { deleteActivityFromFirebase(id); showToast('Onderdeel verwijderd!'); }" />
+      <AdminManage 
+        v-if="currentUser.isAdmin && activeTab === 'activities_manage'" 
+        :activities="activities" 
+        :available-weeks="availableWeeks" 
+        v-model:selected-week="selectedWeek" 
+        @add-activity="async (a) => { await addActivityToFirebase(a); showToast('Onderdeel opgeslagen in database!'); }" 
+        @update-activity="async (a) => { await updateActivityInFirebase(a); showToast('Onderdeel bijgewerkt!'); }" 
+        @delete-activity="async (id) => { await deleteActivityFromFirebase(id); showToast('Onderdeel verwijderd!'); }" 
+      />
+
       <AdminOverview v-else-if="currentUser.isAdmin && activeTab === 'admin'" :reservations="allDatabaseReservations" :unique-students="registeredUsers.filter(u => !u.isAdmin)" :selected-week="selectedWeek" :available-weeks="availableWeeks" :activities="activities" @update:selected-week="selectedWeek = $event" @delete-reservation="(id) => { deleteReservationFromFirebase(id); showToast('Boeking verwijderd.'); }" />
       
       <AdminHistory 
