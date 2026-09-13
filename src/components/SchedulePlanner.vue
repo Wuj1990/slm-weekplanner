@@ -53,7 +53,11 @@ const timeSlots = [
   { id: 8, label: 'Lesuur 8 (14:55 - 15:45)' }, { id: 9, label: 'Lesuur 9 (15:45 - 16:35)' }
 ]
 
-const getActivityById = (id) => props.activities.find(a => String(a.id) === String(id)) || { id, name: 'Onbekend', color: '#64748b' }
+const getActivityById = (id) => {
+  if (!id) return null
+  return props.activities.find(a => String(a.id) === String(id)) || null
+}
+
 const getReservationForSlot = (day, slotLabel) => props.allDatabaseReservations.find(r => r.userEmail?.toLowerCase().trim() === props.currentUser.email?.toLowerCase().trim() && r.day === day && r.slot === slotLabel && String(r.week).trim() === String(props.selectedWeek).trim())
 const getMandatoryForSlot = (day, slotLabel) => props.mandatoryBlocks.find(m => m.day === day && m.slot === slotLabel && String(m.week).trim() === String(props.selectedWeek).trim())
 
@@ -183,6 +187,7 @@ const exportStudentPDF = () => {
       const res = userReservations.find(r => r.day === day && r.slot === slot.label)
       if (!res) return `<td style="padding:0.5rem;text-align:center;color:#cbd5e1;">-</td>`
       const act = getActivityById(res.activityId)
+      if (!act) return `<td style="padding:0.5rem;text-align:center;color:#cbd5e1;">-</td>`
       return `<td style="padding:0.5rem;text-align:center;"><div style="background:${act.color};color:white;padding:0.4rem;border-radius:6px;font-size:0.85rem;"><strong>${act.name}</strong></div></td>`
     }).join('')
     return `<tr><td style="font-size:0.8rem;font-weight:bold;background:#f8fafc;padding:0.5rem;">${slot.label}</td>${cells}</tr>`
@@ -314,13 +319,13 @@ const exportStudentPDF = () => {
                     <template v-if="getMandatoryForSlot(day, slotObj.label)?.targetLevelGroup === 'BLOCKED_PRACTICE'">
                       <div class="blocked-practice-block">🔒 Praktijk<br><small>(Niet beschikbaar)</small></div>
                     </template>
-                    <template v-else-if="getMandatoryForSlot(day, slotObj.label)">
+                    <template v-else-if="getMandatoryForSlot(day, slotObj.label) && getActivityById(getMandatoryForSlot(day, slotObj.label).activityId)">
                       <div class="selected-block mandatory-block" :style="{ backgroundColor: getActivityById(getMandatoryForSlot(day, slotObj.label).activityId).color }">
                         <span class="block-title">📌 {{ getActivityById(getMandatoryForSlot(day, slotObj.label).activityId).name }}</span>
                         <span class="target-group-badge">{{ getMandatoryForSlot(day, slotObj.label).targetLevelGroup === 'ALL' ? 'Voor Iedereen' : getMandatoryForSlot(day, slotObj.label).targetLevelGroup }}</span>
                       </div>
                     </template>
-                    <template v-else-if="getReservationForSlot(day, slotObj.label)">
+                    <template v-else-if="getReservationForSlot(day, slotObj.label) && getActivityById(getReservationForSlot(day, slotObj.label).activityId)">
                       <div class="selected-block" :style="{ backgroundColor: getActivityById(getReservationForSlot(day, slotObj.label).activityId).color }">
                         <span class="block-title">{{ getActivityById(getReservationForSlot(day, slotObj.label).activityId).name }}</span>
                       </div>
@@ -328,7 +333,7 @@ const exportStudentPDF = () => {
                     <template v-else>
                       <span class="text-muted-empty">
                         + Inplannen <br>
-                        <small class="capacity-indicator">({{ getSlotOccupancy(day, slotObj.label, selectedActivity) }}/{{ getActivityById(selectedActivity).maxSlots || 1 }})</small>
+                        <small class="capacity-indicator" v-if="activities.length > 0">({{ getSlotOccupancy(day, slotObj.label, selectedActivity) }}/{{ getActivityById(selectedActivity)?.maxSlots || 1 }})</small>
                       </span>
                     </template>
                   </td>
