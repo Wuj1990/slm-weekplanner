@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 const props = defineProps({
   currentUser: Object,
@@ -12,7 +12,16 @@ const props = defineProps({
 
 const emit = defineEmits(['toggle-slot', 'save-mandatory', 'remove-mandatory', 'update:selectedWeek', 'update-user-profile'])
 
-const selectedActivity = ref(props.activities[0]?.id || '')
+// Filter onderdelen specifiek voor de geselecteerde week (of 'Alle weken')
+const filteredActivities = computed(() => {
+  if (!props.selectedWeek) return props.activities
+  return props.activities.filter(a => {
+    const w = String(a.week || '').trim()
+    return w === 'Alle weken' || w === String(props.selectedWeek).trim()
+  })
+})
+
+const selectedActivity = ref(filteredActivities.value[0]?.id || '')
 
 const showMandatoryModal = ref(false)
 const modalDay = ref('')
@@ -101,7 +110,7 @@ const openMandatoryModal = (day, slotLabel) => {
   modalDay.value = day
   modalSlot.value = slotLabel
   const existing = getMandatoryForSlot(day, slotLabel)
-  modalActivityId.value = existing?.activityId || selectedActivity.value || props.activities[0]?.id || ''
+  modalActivityId.value = existing?.activityId || filteredActivities.value[0]?.id || props.activities[0]?.id || ''
   modalTargetGroup.value = existing?.targetLevelGroup || 'ALL'
   showMandatoryModal.value = true
 }
@@ -117,7 +126,7 @@ const handleRemoveMandatoryFromModal = () => {
 }
 
 const validateBooking = (day, slotLabel) => {
-  const act = props.activities.find(a => String(a.id) === String(selectedActivity.value))
+  const act = filteredActivities.value.find(a => String(a.id) === String(selectedActivity.value))
   if (!act) return false
 
   const userEmail = props.currentUser.email.toLowerCase().trim()
@@ -161,7 +170,7 @@ const validateBooking = (day, slotLabel) => {
 
 const handleSlotClick = (day, slotObj) => {
   if (slotObj.isBreak) return
-  if (!props.activities || props.activities.length === 0) return // Blokkeer als er geen onderdelen zijn!
+  if (!filteredActivities.value || filteredActivities.value.length === 0) return
   if (props.currentUser.isAdmin) return openMandatoryModal(day, slotObj.label)
   if (getMandatoryForSlot(day, slotObj.label)) return
 
@@ -242,7 +251,7 @@ const exportStudentPDF = () => {
         <h3 class="sidebar-title">Kies Onderdeel</h3>
         <div class="activity-list">
           <div 
-            v-for="act in activities" 
+            v-for="act in filteredActivities" 
             :key="act.id" 
             class="activity-card"
             :class="{ selected: String(selectedActivity) === String(act.id) }"
@@ -257,8 +266,8 @@ const exportStudentPDF = () => {
               <p>Locatie: <strong>{{ act.location || 'Klassikaal' }}</strong></p>
             </div>
           </div>
-          <div v-if="activities.length === 0" class="empty-sidebar-text">
-            Geen onderdelen beschikbaar.
+          <div v-if="filteredActivities.length === 0" class="empty-sidebar-text">
+            Geen onderdelen in {{ selectedWeek }}.
           </div>
         </div>
       </aside>
@@ -321,7 +330,7 @@ const exportStudentPDF = () => {
                     v-for="day in days" 
                     :key="day" 
                     class="slot-cell"
-                    :class="{ 'slot-open': activities.length > 0 }"
+                    :class="{ 'slot-open': filteredActivities.length > 0 }"
                     @click="handleSlotClick(day, slotObj)"
                   >
                     <template v-if="getMandatoryForSlot(day, slotObj.label)?.targetLevelGroup === 'BLOCKED_PRACTICE'">
@@ -340,7 +349,7 @@ const exportStudentPDF = () => {
                     </template>
                     <template v-else>
                       <span class="text-muted-empty">
-                        <template v-if="activities.length > 0">
+                        <template v-if="filteredActivities.length > 0">
                           + Inplannen <br>
                           <small class="capacity-indicator">({{ getSlotOccupancy(day, slotObj.label, selectedActivity) }}/{{ getActivityById(selectedActivity)?.maxSlots || 1 }})</small>
                         </template>
@@ -398,7 +407,7 @@ const exportStudentPDF = () => {
         <div v-if="modalTargetGroup !== 'BLOCKED_PRACTICE'" class="form-group">
           <label>Kies Onderdeel / Vak:</label>
           <select v-model="modalActivityId" class="modal-select">
-            <option v-for="act in activities" :key="act.id" :value="act.id">{{ act.name }}</option>
+            <option v-for="act in filteredActivities" :key="act.id" :value="act.id">{{ act.name }}</option>
           </select>
         </div>
 
