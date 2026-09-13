@@ -402,7 +402,7 @@ const exportStudentPDF = () => {
 
 .student-levels-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1rem;
 }
 
@@ -415,16 +415,17 @@ const exportStudentPDF = () => {
   display: flex;
   align-items: center;
   gap: 0.85rem;
+  box-sizing: border-box;
 }
 
 .vak-icon {
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #eff6ff;
-  width: 42px;
-  height: 42px;
+  min-width: 40px;
+  height: 40px;
   border-radius: 8px;
   flex-shrink: 0;
 }
@@ -432,31 +433,29 @@ const exportStudentPDF = () => {
 .vak-info {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  min-width: 0;
+  flex: 1;
 }
 
 .vak-name {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: #64748b;
   font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.2;
 }
 
 .vak-level {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 700;
   color: #0f172a;
-  margin-top: 0.1rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  margin-top: 0.15rem;
+  line-height: 1.3;
+  word-break: break-word;
 }
 
-/* Rest van de stijlen */
+/* Overige stijlen */
 .header-right-actions { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
 .btn-copy-week { padding: 0.35rem 0.8rem; font-size: 0.85rem; font-weight: 700; cursor: pointer; }
 .capacity-indicator { font-size: 0.7rem; color: #64748b; font-weight: 500; }
