@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const props = defineProps({
   activities: { type: Array, default: () => [] },
@@ -9,7 +9,7 @@ const props = defineProps({
 
 const emit = defineEmits(['add-activity', 'update-activity', 'delete-activity', 'update:selectedWeek'])
 
-// Nieuw onderdeel formulier (start standaard met de actieve geselecteerde week, maar is aanpasbaar)
+// Nieuw onderdeel formulier
 const newName = ref('')
 const newColor = ref('#2563eb')
 const newCategory = ref('Praktijk')
@@ -18,6 +18,11 @@ const newMaxHours = ref(2)
 const newPrerequisiteId = ref('')
 const newDescription = ref('')
 const newWeek = ref(props.selectedWeek)
+
+// Zorg dat de doelweek automatisch mee-updatet als je bovenin van week wisselt
+watch(() => props.selectedWeek, (val) => {
+  if (val) newWeek.value = val
+}, { immediate: true })
 
 // Filter enkel de onderdelen van de momenteel geselecteerde week
 const filteredActivities = computed(() => {
