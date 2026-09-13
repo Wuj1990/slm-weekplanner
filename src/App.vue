@@ -1,6 +1,6 @@
 <!-- src/App.vue -->
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import Header from './components/Header.vue'
 import AuthView from './components/AuthView.vue'
 import AdminManage from './components/AdminManage.vue'
@@ -12,9 +12,8 @@ import SchedulePlanner from './components/SchedulePlanner.vue'
 
 import { useAutoLogout } from './composables/useAutoLogout'
 import { getSchoolWeeksList } from './utils/dateUtils'
+import { useFirebaseData } from './composables/useFirebaseData'
 import { 
-  getDb, 
-  getTools, 
   registerUserInFirebase, 
   fetchUserByEmail,
   updateUserInFirebase, 
@@ -39,12 +38,15 @@ const authError = ref('')
 const authSuccess = ref('')
 const selectedWeek = ref(loadStorage('slm_selectedWeek', currentWeek))
 
-const allDatabaseReservations = ref([])
-const activities = ref([])
-const registeredUsers = ref([])
-const mandatoryBlocks = ref([])
+// Haal alle databasedata op via onze nieuwe schone composable
+const { 
+  allDatabaseReservations, 
+  activities, 
+  registeredUsers, 
+  mandatoryBlocks, 
+  isLoading 
+} = useFirebaseData(currentUser)
 
-const isLoading = ref(true)
 const toastMessage = ref('')
 
 const showToast = (msg) => {
@@ -68,56 +70,6 @@ const handleLogout = (reason = '') => {
 }
 
 useAutoLogout(currentUser, handleLogout, 15)
-
-onMounted(() => {
-  const db = getDb()
-  const { collection, onSnapshot } = getTools()
-  if (!db || !collection || !onSnapshot) {
-    isLoading.value = false
-    return
-  }
-
-  const safetyTimeout = setTimeout(() => {
-    if (isLoading.value) {
-      isLoading.value = false
-    }
-  }, 1500)
-
-  let loadedCount = 0
-  const checkAllLoaded = () => {
-    loadedCount++
-    if (loadedCount >= 4) {
-      clearTimeout(safetyTimeout)
-      isLoading.value = false
-    }
-  }
-
-  onSnapshot(collection(db, 'reservations'), s => {
-    allDatabaseReservations.value = s.docs.map(d => ({ id: d.id, ...d.data() }))
-    checkAllLoaded()
-  }, () => checkAllLoaded())
-
-  onSnapshot(collection(db, 'activities'), s => {
-    activities.value = s.docs.map(d => ({ id: d.id, ...d.data() }))
-    checkAllLoaded()
-  }, () => checkAllLoaded())
-
-  onSnapshot(collection(db, 'users'), s => {
-    registeredUsers.value = s.docs.map(d => ({ ...d.data() }))
-    if (currentUser.value && !currentUser.value.isAdmin) {
-      const latestMe = registeredUsers.value.find(u => u.email?.toLowerCase().trim() === currentUser.value.email?.toLowerCase().trim())
-      if (latestMe) {
-        currentUser.value = latestMe
-      }
-    }
-    checkAllLoaded()
-  }, () => checkAllLoaded())
-
-  onSnapshot(collection(db, 'mandatory'), s => {
-    mandatoryBlocks.value = s.docs.map(d => ({ id: d.id, ...d.data() }))
-    checkAllLoaded()
-  }, () => checkAllLoaded())
-})
 
 const handleLogin = async (data) => {
   authError.value = ''; authSuccess.value = ''
@@ -237,7 +189,6 @@ watch(selectedWeek, val => localStorage.setItem('slm_selectedWeek', JSON.stringi
 
 <template>
   <div class="app-container">
-    <!-- LAADSCHERM -->
     <div v-if="isLoading" class="loading-overlay-screen">
       <div class="spinner"></div>
       <p>Gegevens ophalen van de database...</p>
@@ -304,7 +255,6 @@ watch(selectedWeek, val => localStorage.setItem('slm_selectedWeek', JSON.stringi
         @delete-user="handleDeleteUser" 
       />
 
-      <!-- Voortgang per leerling overzicht -->
       <StudentProgress 
         v-else-if="currentUser.isAdmin && activeTab === 'student_progress'" 
         :registered-users="registeredUsers" 
@@ -315,7 +265,6 @@ watch(selectedWeek, val => localStorage.setItem('slm_selectedWeek', JSON.stringi
       <SchedulePlanner v-else :current-user="currentUser" :activities="activities" :all-database-reservations="allDatabaseReservations" :mandatory-blocks="mandatoryBlocks" :available-weeks="availableWeeks" v-model:selected-week="selectedWeek" @toggle-slot="handleToggleSlot" @save-mandatory="(b) => { saveMandatoryBlock(b); showToast('Lesuur instelling opgeslagen!'); }" @remove-mandatory="(b) => { removeMandatoryBlock(b); showToast('Instelling gewist.'); }" @update-user-profile="handleUpdateUserProfile" />
     </template>
 
-    <!-- TOAST NOTIFICATIE POPUP -->
     <transition name="toast-fade">
       <div v-if="toastMessage" class="global-toast-notification">
         ✨ {{ toastMessage }}
@@ -338,7 +287,6 @@ watch(selectedWeek, val => localStorage.setItem('slm_selectedWeek', JSON.stringi
   color: #0f172a;
   font-weight: 700;
 }
-
 .spinner {
   width: 40px;
   height: 40px;
@@ -347,11 +295,9 @@ watch(selectedWeek, val => localStorage.setItem('slm_selectedWeek', JSON.stringi
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
-
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
-
 .global-toast-notification {
   position: fixed;
   bottom: 24px;
@@ -366,7 +312,6 @@ watch(selectedWeek, val => localStorage.setItem('slm_selectedWeek', JSON.stringi
   z-index: 9999;
   border-left: 4px solid #10b981;
 }
-
 .toast-fade-enter-active, .toast-fade-leave-active {
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
