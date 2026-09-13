@@ -2,15 +2,15 @@
 import { initializeApp } from 'firebase/app'
 import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDocs, getDoc, setDoc, query, where, onSnapshot } from 'firebase/firestore'
 
-// Controleer of deze gegevens correct ingevuld zijn met jouw echte Firebase projectgegevens!
+// Jouw echte Firebase configuratie
 const firebaseConfig = {
-  apiKey: "JOUW_API_KEY",
-  authDomain: "JOUW_AUTH_DOMAIN",
-  projectId: "JOUW_PROJECT_ID",
-  storageBucket: "JOUW_STORAGE_BUCKET",
-  messagingSenderId: "JOUW_MESSAGING_SENDER_ID",
-  appId: "JOUW_APP_ID"
-}
+  apiKey: "AIzaSyATlVSEqN4v53ELnFvNAJ-xRVg-utMA2Zo",
+  authDomain: "slm-weekplanner.firebaseapp.com",
+  projectId: "slm-weekplanner",
+  storageBucket: "slm-weekplanner.firebasestorage.app",
+  messagingSenderId: "1032972021118",
+  appId: "1:1032972021118:web:15c0f4eb6be7c7aa37572f"
+};
 
 let db = null
 try {
@@ -23,10 +23,10 @@ try {
 export const getDb = () => db
 export const getTools = () => ({ collection, addDoc, updateDoc, deleteDoc, doc, getDocs, getDoc, setDoc, query, where, onSnapshot })
 
-// 1. Activiteiten toevoegen met strenge controle op `db`
+// 1. Activiteiten toevoegen
 export const addActivityToFirebase = async (activityData) => {
   if (!db) {
-    throw new Error("Firebase database is niet gekoppeld! Controleer je firebaseConfig sleutels in src/firebase.js.")
+    throw new Error("Firebase database is niet gekoppeld!")
   }
   return await addDoc(collection(db, 'activities'), {
     name: activityData.name,
