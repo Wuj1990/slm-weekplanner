@@ -1,3 +1,4 @@
+<!-- src/components/AdminOverview.vue -->
 <script setup>
 import { ref, computed, watch } from 'vue'
 
@@ -48,7 +49,6 @@ const toggleExpandStudent = (email) => {
   expandedStudentEmail.value = expandedStudentEmail.value === email ? null : email
 }
 
-// EXPORT NAAR PDF / AFDRUKKEN
 const exportToPDF = () => {
   if (currentWeekReservations.value.length === 0) return alert('Geen boekingen om te exporteren.')
 

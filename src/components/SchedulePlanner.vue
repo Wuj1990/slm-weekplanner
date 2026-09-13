@@ -1,3 +1,4 @@
+<!-- src/components/SchedulePlanner.vue -->
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 
@@ -12,7 +13,6 @@ const props = defineProps({
 
 const emit = defineEmits(['toggle-slot', 'save-mandatory', 'remove-mandatory', 'update:selectedWeek', 'update-user-profile'])
 
-// Filter onderdelen specifiek voor de geselecteerde week (of 'Alle weken')
 const filteredActivities = computed(() => {
   if (!props.selectedWeek) return props.activities
   return props.activities.filter(a => {
@@ -70,7 +70,6 @@ const getActivityById = (id) => {
 const getReservationForSlot = (day, slotLabel) => props.allDatabaseReservations.find(r => r.userEmail?.toLowerCase().trim() === props.currentUser.email?.toLowerCase().trim() && r.day === day && r.slot === slotLabel && String(r.week).trim() === String(props.selectedWeek).trim())
 const getMandatoryForSlot = (day, slotLabel) => props.mandatoryBlocks.find(m => m.day === day && m.slot === slotLabel && String(m.week).trim() === String(props.selectedWeek).trim())
 
-// 1. BEZETTINGSMETER HELPER
 const getSlotOccupancy = (day, slotLabel, activityId) => {
   if (!activityId) return 0
   return props.allDatabaseReservations.filter(r => 
@@ -81,7 +80,6 @@ const getSlotOccupancy = (day, slotLabel, activityId) => {
   ).length
 }
 
-// 2. KOPIEER VORIGE WEEK FUNCTIE
 const handleCopyPreviousWeek = () => {
   const currentIndex = props.availableWeeks.findIndex(w => String(w.id || w) === String(props.selectedWeek))
   if (currentIndex <= 0) return alert('Geen vorige week beschikbaar om van te kopiëren.')
@@ -182,7 +180,6 @@ const handleSlotClick = (day, slotObj) => {
   emit('toggle-slot', { day, slotObj, selectedActivity: selectedActivity.value })
 }
 
-// EXPORT EIGEN ROOSTER NAAR PDF
 const exportStudentPDF = () => {
   const userReservations = props.allDatabaseReservations.filter(r => 
     r.userEmail?.toLowerCase().trim() === props.currentUser.email?.toLowerCase().trim() && 
@@ -290,8 +287,6 @@ const exportStudentPDF = () => {
             </button>
             <div class="week-picker-wrapper">
               <label>Schoolweek:</label>
-              
-              <!-- BEHEERDER: Kan vrij schakelen tussen alle weken -->
               <select 
                 v-if="currentUser.isAdmin" 
                 :value="selectedWeek" 
@@ -302,8 +297,6 @@ const exportStudentPDF = () => {
                   {{ w.label || w }}
                 </option>
               </select>
-
-              <!-- LEERLING: Ziet enkel vast de actieve week voor de veiligheid -->
               <span v-else class="current-week-badge">
                 🔒 {{ availableWeeks.find(w => (w.id || w) === selectedWeek)?.label || selectedWeek }}
               </span>
@@ -367,7 +360,6 @@ const exportStudentPDF = () => {
       </section>
     </div>
 
-    <!-- ONBOARDING POP-UP -->
     <div v-if="showFirstLoginModal" class="modal-overlay">
       <div class="modal-card">
         <h3>👋 Welkom op de SLM Weekplanner!</h3>
@@ -384,7 +376,6 @@ const exportStudentPDF = () => {
       </div>
     </div>
 
-    <!-- MODAL BEHEERDERS -->
     <div v-if="showMandatoryModal" class="modal-overlay" @click.self="showMandatoryModal = false">
       <div class="modal-card">
         <div class="modal-header-flex">
@@ -424,7 +415,6 @@ const exportStudentPDF = () => {
 </template>
 
 <style scoped>
-/* Strakke styling voor Niveaugroepen Banner */
 .student-levels-banner {
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -433,20 +423,17 @@ const exportStudentPDF = () => {
   margin-bottom: 1.5rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
-
 .student-levels-banner h3 {
   margin: 0 0 0.85rem 0;
   font-size: 1.05rem;
   color: #0f172a;
   font-weight: 700;
 }
-
 .student-levels-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1rem;
 }
-
 .level-card-item {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
@@ -458,7 +445,6 @@ const exportStudentPDF = () => {
   gap: 0.85rem;
   box-sizing: border-box;
 }
-
 .vak-icon {
   font-size: 1.3rem;
   display: flex;
@@ -470,14 +456,12 @@ const exportStudentPDF = () => {
   border-radius: 8px;
   flex-shrink: 0;
 }
-
 .vak-info {
   display: flex;
   flex-direction: column;
   min-width: 0;
   flex: 1;
 }
-
 .vak-name {
   font-size: 0.72rem;
   text-transform: uppercase;
@@ -486,7 +470,6 @@ const exportStudentPDF = () => {
   font-weight: 700;
   line-height: 1.2;
 }
-
 .vak-level {
   font-size: 0.92rem;
   font-weight: 700;
@@ -495,8 +478,6 @@ const exportStudentPDF = () => {
   line-height: 1.3;
   word-break: break-word;
 }
-
-/* Veilige badge voor actieve week leerling */
 .current-week-badge {
   background: #eff6ff;
   color: #1d4ed8;
@@ -509,7 +490,6 @@ const exportStudentPDF = () => {
   align-items: center;
   gap: 0.3rem;
 }
-
 .empty-sidebar-text {
   color: #94a3b8;
   font-size: 0.85rem;
@@ -517,8 +497,6 @@ const exportStudentPDF = () => {
   padding: 1rem 0;
   font-style: italic;
 }
-
-/* Overige stijlen */
 .header-right-actions { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
 .btn-copy-week { padding: 0.35rem 0.8rem; font-size: 0.85rem; font-weight: 700; cursor: pointer; }
 .capacity-indicator { font-size: 0.7rem; color: #64748b; font-weight: 500; }

@@ -1,3 +1,4 @@
+<!-- src/components/AdminManage.vue -->
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { addActivityToFirebase } from '../firebase'
@@ -5,13 +6,11 @@ import { addActivityToFirebase } from '../firebase'
 const props = defineProps({
   activities: { type: Array, default: () => [] },
   selectedWeek: { type: String, default: '' },
-  availableWeeks: { type: Array, default: () => [] },
-  currentWeek: { type: String, default: '' }
+  availableWeeks: { type: Array, default: () => [] }
 })
 
 const emit = defineEmits(['add-activity', 'update-activity', 'delete-activity', 'update:selectedWeek'])
 
-// Nieuw onderdeel formulier
 const newName = ref('')
 const newColor = ref('#2563eb')
 const newCategory = ref('Praktijk')
@@ -21,12 +20,10 @@ const newPrerequisiteId = ref('')
 const newDescription = ref('')
 const newWeek = ref(props.selectedWeek || props.availableWeeks[0]?.id || props.availableWeeks[0] || 'Week 1')
 
-// Houd newWeek gesynchroniseerd met de geselecteerde week bovenin
 watch(() => props.selectedWeek, (val) => {
   if (val) newWeek.value = val
 }, { immediate: true })
 
-// Filter enkel de onderdelen van de week die je hier in het formulier kiest (newWeek)
 const filteredActivities = computed(() => {
   const targetWeek = newWeek.value || props.selectedWeek
   if (!targetWeek) return props.activities
@@ -77,7 +74,6 @@ const handleUpdate = (act) => {
       <p class="page-subtitle">Beheer de onderdelen per week.</p>
     </div>
 
-    <!-- NIEUW ONDERDEEL TOEVOEGEN -->
     <section class="admin-card">
       <h3>➕ Nieuw Onderdeel Toevoegen voor <strong>{{ newWeek }}</strong></h3>
       <form @submit.prevent="handleAdd" class="form-grid">
@@ -86,7 +82,7 @@ const handleUpdate = (act) => {
           <select v-model="newWeek" class="input-field">
             <option value="Alle weken">📅 Alle weken (Algemeen)</option>
             <option v-for="wk in availableWeeks" :key="wk.id || wk" :value="wk.id || wk">
-              {{ wk.label || wk }} {{ (wk.id || wk) === currentWeek ? '⭐ (huidige week)' : '' }}
+              {{ wk.label || wk }}
             </option>
           </select>
         </div>
@@ -141,7 +137,6 @@ const handleUpdate = (act) => {
       </form>
     </section>
 
-    <!-- BESTAANDE ONDERDELEN BEHEREN -->
     <section class="admin-card">
       <h3>📋 Onderdelen in {{ newWeek }}</h3>
 
@@ -169,7 +164,7 @@ const handleUpdate = (act) => {
                 <select v-model="act.week" class="table-select" @change="handleUpdate(act)">
                   <option value="Alle weken">Alle weken</option>
                   <option v-for="wk in availableWeeks" :key="wk.id || wk" :value="wk.id || wk">
-                    {{ wk.label || wk }} {{ (wk.id || wk) === currentWeek ? '⭐ (huidige week)' : '' }}
+                    {{ wk.label || wk }}
                   </option>
                 </select>
               </td>

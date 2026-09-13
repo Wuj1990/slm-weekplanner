@@ -1,3 +1,4 @@
+<!-- src/components/AdminHistory.vue -->
 <script setup>
 import { ref, computed } from 'vue'
 
@@ -13,7 +14,7 @@ const emit = defineEmits(['update-user'])
 
 const selectedEmail = ref('')
 const selectedWeek = ref(props.currentWeek || props.availableWeeks[0]?.id || '')
-const batchActivityId = ref('') // Voor de groepsactie
+const batchActivityId = ref('')
 
 const days = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag']
 const timeSlots = [
@@ -37,7 +38,6 @@ const studentReservations = computed(() => {
 const getActivity = (id) => props.activities.find(a => String(a.id) === String(id)) || { name: 'Onbekend', color: '#64748b' }
 const getRes = (day, slot) => studentReservations.value.find(r => r.day === day && r.slot === slot)
 
-// Individueel vinkje aanpassen
 const handleCompletionToggle = (activityId, event) => {
   if (!selectedStudent.value) return
   const isChecked = event.target.checked
@@ -53,7 +53,6 @@ const handleCompletionToggle = (activityId, event) => {
   })
 }
 
-// GROEPSACTIE: Alle leerlingen met een boeking voor een activiteit in deze week in één keer afwerken
 const handleBatchComplete = () => {
   if (!batchActivityId.value) return alert('Kies eerst een onderdeel om in bulk af te werken.')
   
@@ -138,7 +137,6 @@ const openStudentInNewTab = () => {
       <p class="page-subtitle">Beheer individuele voortgang per leerling of voer een groepsactie uit per schoolweek.</p>
     </div>
 
-    <!-- BATCH / GROEPSACTIE BALK -->
     <section class="batch-action-card no-print">
       <div class="batch-flex">
         <div>
@@ -161,7 +159,9 @@ const openStudentInNewTab = () => {
       <div class="control-group">
         <label>1. Kies Schoolweek (voor rooster & batch):</label>
         <select v-model="selectedWeek" class="modal-select">
-          <option v-for="w in availableWeeks" :key="w.id" :value="w.id">{{ w.label }}</option>
+          <option v-for="w in availableWeeks" :key="w.id || w" :value="w.id || w">
+            {{ w.label || w }}
+          </option>
         </select>
       </div>
 
@@ -182,7 +182,6 @@ const openStudentInNewTab = () => {
     </section>
 
     <div v-if="selectedStudent" class="history-grid-layout">
-      <!-- LINKERKANT: VOORTGANG & AFGEWERKTE ONDERDELEN -->
       <section class="admin-table-card progress-sidebar no-print">
         <h3>✅ Voortgang: {{ selectedStudent.name }}</h3>
         <p class="section-sub">Individueel aan te passen vinkjes:</p>
@@ -201,7 +200,6 @@ const openStudentInNewTab = () => {
         </div>
       </section>
 
-      <!-- RECHTERKANT: WEEKROOSTER OVERZICHT -->
       <section class="admin-table-card schedule-main-card">
         <div class="header-flex">
           <h3>Weekrooster van {{ selectedStudent.name }} ({{ selectedWeek }})</h3>
