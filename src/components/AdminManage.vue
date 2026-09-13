@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { addActivityToFirebase } from '../firebase'
 
 const props = defineProps({
   activities: { type: Array, default: () => [] },
@@ -33,10 +34,10 @@ const filteredActivities = computed(() => {
   })
 })
 
-const handleAdd = () => {
+const handleAdd = async () => {
   if (!newName.value.trim()) return
 
-  emit('add-activity', {
+  const payload = {
     name: newName.value.trim(),
     color: newColor.value,
     category: newCategory.value,
@@ -44,12 +45,19 @@ const handleAdd = () => {
     maxHours: Number(newMaxHours.value) || 2,
     prerequisiteId: newPrerequisiteId.value || '',
     description: newDescription.value.trim() || 'Geen beschrijving',
-    week: newWeek.value || props.selectedWeek // Garandeert dat de week altijd wordt meegestuurd!
-  })
+    week: newWeek.value || props.selectedWeek
+  }
 
-  newName.value = ''
-  newPrerequisiteId.value = ''
-  newDescription.value = ''
+  try {
+    await addActivityToFirebase(payload)
+    alert('Onderdeel succesvol opgeslagen in Firebase database!')
+    newName.value = ''
+    newPrerequisiteId.value = ''
+    newDescription.value = ''
+  } catch (err) {
+    console.error(err)
+    alert('Fout bij opslaan in database: ' + err.message)
+  }
 }
 
 const handleUpdate = (act) => {
