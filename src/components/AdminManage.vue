@@ -9,7 +9,7 @@ const props = defineProps({
 
 const emit = defineEmits(['add-activity', 'update-activity', 'delete-activity', 'update:selectedWeek'])
 
-// Nieuw onderdeel formulier (neemt standaard de actieve geselecteerde week over)
+// Nieuw onderdeel formulier (start standaard met de actieve geselecteerde week, maar is aanpasbaar)
 const newName = ref('')
 const newColor = ref('#2563eb')
 const newCategory = ref('Praktijk')
@@ -17,6 +17,7 @@ const newMaxSlots = ref(1)
 const newMaxHours = ref(2)
 const newPrerequisiteId = ref('')
 const newDescription = ref('')
+const newWeek = ref(props.selectedWeek)
 
 // Filter enkel de onderdelen van de momenteel geselecteerde week
 const filteredActivities = computed(() => {
@@ -35,7 +36,7 @@ const handleAdd = () => {
     maxHours: Number(newMaxHours.value) || 2,
     prerequisiteId: newPrerequisiteId.value || '',
     description: newDescription.value.trim() || 'Geen beschrijving',
-    week: props.selectedWeek || props.availableWeeks[0]?.id || props.availableWeeks[0] || 'Week 1'
+    week: newWeek.value || props.selectedWeek
   })
 
   newName.value = ''
@@ -52,16 +53,20 @@ const handleUpdate = (act) => {
   <main class="dashboard-wrapper">
     <div class="admin-header-card no-print">
       <h2 class="page-title">⚙️ Vakken & Onderdelen Beheren</h2>
-      <p class="page-subtitle">Beheer de onderdelen specifiek voor de geselecteerde week.</p>
+      <p class="page-subtitle">Beheer de onderdelen per week.</p>
     </div>
 
     <!-- NIEUW ONDERDEEL TOEVOEGEN -->
     <section class="admin-card">
-      <h3>➕ Nieuw Onderdeel Toevoegen voor <strong>{{ selectedWeek }}</strong></h3>
+      <h3>➕ Nieuw Onderdeel Toevoegen</h3>
       <form @submit.prevent="handleAdd" class="form-grid">
         <div class="form-group">
           <label>Doelweek:</label>
-          <input type="text" :value="selectedWeek" disabled class="input-field disabled-field" />
+          <select v-model="newWeek" class="input-field">
+            <option v-for="wk in availableWeeks" :key="wk.id || wk" :value="wk.id || wk">
+              {{ wk.label || wk }}
+            </option>
+          </select>
         </div>
 
         <div class="form-group">
@@ -97,7 +102,7 @@ const handleUpdate = (act) => {
           <label>🔗 Vereiste Voorgaande Opdracht:</label>
           <select v-model="newPrerequisiteId" class="input-field">
             <option value="">-- Geen voorwaarde --</option>
-            <option v-for="act in filteredActivities" :key="act.id" :value="act.id">{{ act.name }}</option>
+            <option v-for="act in activities" :key="act.id" :value="act.id">{{ act.name }} ({{ act.week }})</option>
           </select>
         </div>
 
@@ -108,7 +113,7 @@ const handleUpdate = (act) => {
 
         <div class="form-actions full-width">
           <button type="submit" class="btn-primary">
-            <span class="btn-icon">+</span> Onderdeel Toevoegen aan {{ selectedWeek }}
+            <span class="btn-icon">+</span> Onderdeel Toevoegen
           </button>
         </div>
       </form>
@@ -165,7 +170,7 @@ const handleUpdate = (act) => {
               <td>
                 <select v-model="act.prerequisiteId" class="table-select" @change="handleUpdate(act)">
                   <option value="">-- Geen voorwaarde --</option>
-                  <option v-for="other in filteredActivities.filter(a => String(a.id) !== String(act.id))" :key="other.id" :value="other.id">
+                  <option v-for="other in activities.filter(a => String(a.id) !== String(act.id))" :key="other.id" :value="other.id">
                     {{ other.name }}
                   </option>
                 </select>
@@ -221,12 +226,6 @@ const handleUpdate = (act) => {
   font-size: 0.9rem;
   background-color: #ffffff;
   color: #0f172a;
-}
-.disabled-field {
-  background-color: #f1f5f9;
-  color: #64748b;
-  cursor: not-allowed;
-  font-weight: 700;
 }
 .input-field:focus {
   outline: none;
