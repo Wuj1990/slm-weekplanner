@@ -77,10 +77,18 @@ onMounted(() => {
     return
   }
 
+  // Fallback timer zodat het laadscherm nooit langer dan 1.5 seconde blijft hangen
+  const safetyTimeout = setTimeout(() => {
+    if (isLoading.value) {
+      isLoading.value = false
+    }
+  }, 1500)
+
   let loadedCount = 0
   const checkAllLoaded = () => {
     loadedCount++
     if (loadedCount >= 4) {
+      clearTimeout(safetyTimeout)
       isLoading.value = false
     }
   }
@@ -88,27 +96,28 @@ onMounted(() => {
   onSnapshot(collection(db, 'reservations'), s => {
     allDatabaseReservations.value = s.docs.map(d => ({ id: d.id, ...d.data() }))
     checkAllLoaded()
-  })
+  }, () => checkAllLoaded())
+
   onSnapshot(collection(db, 'activities'), s => {
-    if (!s.empty) activities.value = s.docs.map(d => ({ id: d.id, ...d.data() }))
+    activities.value = s.docs.map(d => ({ id: d.id, ...d.data() }))
     checkAllLoaded()
-  })
+  }, () => checkAllLoaded())
+
   onSnapshot(collection(db, 'users'), s => {
-    if (!s.empty) {
-      registeredUsers.value = s.docs.map(d => ({ ...d.data() }))
-      if (currentUser.value && !currentUser.value.isAdmin) {
-        const latestMe = registeredUsers.value.find(u => u.email?.toLowerCase().trim() === currentUser.value.email?.toLowerCase().trim())
-        if (latestMe) {
-          currentUser.value = latestMe
-        }
+    registeredUsers.value = s.docs.map(d => ({ ...d.data() }))
+    if (currentUser.value && !currentUser.value.isAdmin) {
+      const latestMe = registeredUsers.value.find(u => u.email?.toLowerCase().trim() === currentUser.value.email?.toLowerCase().trim())
+      if (latestMe) {
+        currentUser.value = latestMe
       }
     }
     checkAllLoaded()
-  })
+  }, () => checkAllLoaded())
+
   onSnapshot(collection(db, 'mandatory'), s => {
     mandatoryBlocks.value = s.docs.map(d => ({ id: d.id, ...d.data() }))
     checkAllLoaded()
-  })
+  }, () => checkAllLoaded())
 })
 
 const handleLogin = async (data) => {
@@ -333,4 +342,3 @@ watch(selectedWeek, val => localStorage.setItem('slm_selectedWeek', JSON.stringi
   transform: translateY(10px);
 }
 </style>
-```[cite: 4]
