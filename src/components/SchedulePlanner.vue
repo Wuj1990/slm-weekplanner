@@ -63,6 +63,7 @@ const getMandatoryForSlot = (day, slotLabel) => props.mandatoryBlocks.find(m => 
 
 // 1. BEZETTINGSMETER HELPER
 const getSlotOccupancy = (day, slotLabel, activityId) => {
+  if (!activityId) return 0
   return props.allDatabaseReservations.filter(r => 
     String(r.week).trim() === String(props.selectedWeek).trim() && 
     r.day === day && 
@@ -117,7 +118,7 @@ const handleRemoveMandatoryFromModal = () => {
 
 const validateBooking = (day, slotLabel) => {
   const act = props.activities.find(a => String(a.id) === String(selectedActivity.value))
-  if (!act) return true
+  if (!act) return false
 
   const userEmail = props.currentUser.email.toLowerCase().trim()
   const weekReservations = props.allDatabaseReservations.filter(r => r.userEmail?.toLowerCase().trim() === userEmail && String(r.week).trim() === String(props.selectedWeek).trim())
@@ -160,11 +161,14 @@ const validateBooking = (day, slotLabel) => {
 
 const handleSlotClick = (day, slotObj) => {
   if (slotObj.isBreak) return
+  if (!props.activities || props.activities.length === 0) return // Blokkeer als er geen onderdelen zijn!
   if (props.currentUser.isAdmin) return openMandatoryModal(day, slotObj.label)
   if (getMandatoryForSlot(day, slotObj.label)) return
 
   const existing = getReservationForSlot(day, slotObj.label)
   if (!existing && !validateBooking(day, slotObj.label)) return
+
+  if (!selectedActivity.value) return
 
   emit('toggle-slot', { day, slotObj, selectedActivity: selectedActivity.value })
 }
@@ -253,6 +257,9 @@ const exportStudentPDF = () => {
               <p>Locatie: <strong>{{ act.location || 'Klassikaal' }}</strong></p>
             </div>
           </div>
+          <div v-if="activities.length === 0" class="empty-sidebar-text">
+            Geen onderdelen beschikbaar.
+          </div>
         </div>
       </aside>
 
@@ -313,7 +320,8 @@ const exportStudentPDF = () => {
                   <td 
                     v-for="day in days" 
                     :key="day" 
-                    class="slot-cell slot-open"
+                    class="slot-cell"
+                    :class="{ 'slot-open': activities.length > 0 }"
                     @click="handleSlotClick(day, slotObj)"
                   >
                     <template v-if="getMandatoryForSlot(day, slotObj.label)?.targetLevelGroup === 'BLOCKED_PRACTICE'">
@@ -332,8 +340,13 @@ const exportStudentPDF = () => {
                     </template>
                     <template v-else>
                       <span class="text-muted-empty">
-                        + Inplannen <br>
-                        <small class="capacity-indicator" v-if="activities.length > 0">({{ getSlotOccupancy(day, slotObj.label, selectedActivity) }}/{{ getActivityById(selectedActivity)?.maxSlots || 1 }})</small>
+                        <template v-if="activities.length > 0">
+                          + Inplannen <br>
+                          <small class="capacity-indicator">({{ getSlotOccupancy(day, slotObj.label, selectedActivity) }}/{{ getActivityById(selectedActivity)?.maxSlots || 1 }})</small>
+                        </template>
+                        <template v-else>
+                          <span style="color: #cbd5e1;">-</span>
+                        </template>
                       </span>
                     </template>
                   </td>
@@ -486,6 +499,14 @@ const exportStudentPDF = () => {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
+}
+
+.empty-sidebar-text {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 1rem 0;
+  font-style: italic;
 }
 
 /* Overige stijlen */
