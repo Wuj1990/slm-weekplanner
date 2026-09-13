@@ -17,9 +17,9 @@ const newMaxSlots = ref(1)
 const newMaxHours = ref(2)
 const newPrerequisiteId = ref('')
 const newDescription = ref('')
-const newWeek = ref(props.selectedWeek)
+const newWeek = ref(props.selectedWeek || props.availableWeeks[0]?.id || props.availableWeeks[0] || 'Week 1')
 
-// Zorg dat de doelweek automatisch mee-updatet als je bovenin van week wisselt
+// Houd newWeek gesynchroniseerd met de geselecteerde week bovenin
 watch(() => props.selectedWeek, (val) => {
   if (val) newWeek.value = val
 }, { immediate: true })
@@ -27,7 +27,10 @@ watch(() => props.selectedWeek, (val) => {
 // Filter enkel de onderdelen van de momenteel geselecteerde week
 const filteredActivities = computed(() => {
   if (!props.selectedWeek) return props.activities
-  return props.activities.filter(act => String(act.week).trim() === String(props.selectedWeek).trim())
+  return props.activities.filter(act => {
+    const w = String(act.week || '').trim()
+    return w === 'Alle weken' || w === String(props.selectedWeek).trim()
+  })
 })
 
 const handleAdd = () => {
@@ -41,7 +44,7 @@ const handleAdd = () => {
     maxHours: Number(newMaxHours.value) || 2,
     prerequisiteId: newPrerequisiteId.value || '',
     description: newDescription.value.trim() || 'Geen beschrijving',
-    week: newWeek.value || props.selectedWeek
+    week: newWeek.value || props.selectedWeek // Garandeert dat de week altijd wordt meegestuurd!
   })
 
   newName.value = ''
@@ -63,11 +66,12 @@ const handleUpdate = (act) => {
 
     <!-- NIEUW ONDERDEEL TOEVOEGEN -->
     <section class="admin-card">
-      <h3>➕ Nieuw Onderdeel Toevoegen</h3>
+      <h3>➕ Nieuw Onderdeel Toevoegen voor <strong>{{ newWeek }}</strong></h3>
       <form @submit.prevent="handleAdd" class="form-grid">
         <div class="form-group">
           <label>Doelweek:</label>
           <select v-model="newWeek" class="input-field">
+            <option value="Alle weken">📅 Alle weken (Algemeen)</option>
             <option v-for="wk in availableWeeks" :key="wk.id || wk" :value="wk.id || wk">
               {{ wk.label || wk }}
             </option>
@@ -107,7 +111,7 @@ const handleUpdate = (act) => {
           <label>🔗 Vereiste Voorgaande Opdracht:</label>
           <select v-model="newPrerequisiteId" class="input-field">
             <option value="">-- Geen voorwaarde --</option>
-            <option v-for="act in activities" :key="act.id" :value="act.id">{{ act.name }} ({{ act.week }})</option>
+            <option v-for="act in filteredActivities" :key="act.id" :value="act.id">{{ act.name }}</option>
           </select>
         </div>
 
@@ -118,7 +122,7 @@ const handleUpdate = (act) => {
 
         <div class="form-actions full-width">
           <button type="submit" class="btn-primary">
-            <span class="btn-icon">+</span> Onderdeel Toevoegen
+            <span class="btn-icon">+</span> Onderdeel Toevoegen aan {{ newWeek }}
           </button>
         </div>
       </form>
@@ -175,7 +179,7 @@ const handleUpdate = (act) => {
               <td>
                 <select v-model="act.prerequisiteId" class="table-select" @change="handleUpdate(act)">
                   <option value="">-- Geen voorwaarde --</option>
-                  <option v-for="other in activities.filter(a => String(a.id) !== String(act.id))" :key="other.id" :value="other.id">
+                  <option v-for="other in filteredActivities.filter(a => String(a.id) !== String(act.id))" :key="other.id" :value="other.id">
                     {{ other.name }}
                   </option>
                 </select>
