@@ -253,9 +253,33 @@ watch(selectedWeek, val => localStorage.setItem('slm_selectedWeek', JSON.stringi
         :activities="activities" 
         :available-weeks="availableWeeks" 
         v-model:selected-week="selectedWeek" 
-        @add-activity="async (a) => { await addActivityToFirebase(a); showToast('Onderdeel opgeslagen in database!'); }" 
-        @update-activity="async (a) => { await updateActivityInFirebase(a); showToast('Onderdeel bijgewerkt!'); }" 
-        @delete-activity="async (id) => { await deleteActivityFromFirebase(id); showToast('Onderdeel verwijderd!'); }" 
+        @add-activity="async (a) => { 
+          try { 
+            await addActivityToFirebase(a); 
+            showToast('Onderdeel opgeslagen in database!'); 
+          } catch (err) { 
+            console.error('Fout bij wegschrijven naar Firebase:', err); 
+            alert('Kan onderdeel niet opslaan in database: ' + err.message); 
+          } 
+        }" 
+        @update-activity="async (a) => { 
+          try { 
+            await updateActivityInFirebase(a); 
+            showToast('Onderdeel bijgewerkt!'); 
+          } catch (err) { 
+            console.error(err); 
+            alert('Fout bij bijwerken: ' + err.message); 
+          } 
+        }" 
+        @delete-activity="async (id) => { 
+          try { 
+            await deleteActivityFromFirebase(id); 
+            showToast('Onderdeel verwijderd!'); 
+          } catch (err) { 
+            console.error(err); 
+            alert('Fout bij verwijderen: ' + err.message); 
+          } 
+        }" 
       />
 
       <AdminOverview v-else-if="currentUser.isAdmin && activeTab === 'admin'" :reservations="allDatabaseReservations" :unique-students="registeredUsers.filter(u => !u.isAdmin)" :selected-week="selectedWeek" :available-weeks="availableWeeks" :activities="activities" @update:selected-week="selectedWeek = $event" @delete-reservation="(id) => { deleteReservationFromFirebase(id); showToast('Boeking verwijderd.'); }" />
