@@ -1,0 +1,519 @@
+/* ==========================================
+   SLM HUISSTIJL & GLOBAL LAYOUT (STAGGERED)
+   ========================================== */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-color: #f1f5f9; /* Zacht warmgrijs, aangenamer voor de ogen */
+  color: #1e293b;
+  min-height: 100vh;
+}
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.no-print {
+  display: flex;
+}
+
+@media print {
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  body { background-color: white !important; color: black !important; }
+}
+
+/* ==========================================
+   HEADER / NAVBAR (WIT & OVERZICHTELIJK)
+   ========================================== */
+
+.navbar-white {
+  background-color: #ffffff;
+  border-bottom: 1px solid #cbd5e1;
+  padding: 0.8rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+.brand-container {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.brand-text h1 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #051B35; /* Officiële SLM marineblauw */
+  margin: 0;
+  line-height: 1.1;
+}
+
+.badge-admin {
+  background-color: #d97706;
+  color: white;
+  font-size: 0.68rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+/* Dropdown Navigatie Beheerder */
+.nav-dropdown-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background-color: #f8fafc;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+}
+
+.dropdown-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.nav-dropdown-select {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #0f172a;
+  background-color: #ffffff;
+  cursor: pointer;
+  outline: none;
+}
+
+/* User Menu & Avatar */
+.user-menu-container {
+  position: relative;
+}
+
+.user-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background-color: #f1f5f9;
+  padding: 0.35rem 0.75rem 0.35rem 0.35rem;
+  border-radius: 30px;
+  cursor: pointer;
+  border: 1px solid #cbd5e1;
+  transition: background-color 0.2s;
+}
+
+.user-pill:hover {
+  background-color: #e2e8f0;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  background-color: #2563eb;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+.avatar-admin {
+  background-color: #d97706;
+}
+
+.user-details-compact {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.user-name {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: #0f172a;
+}
+
+.dropdown-arrow {
+  font-size: 0.65rem;
+  color: #64748b;
+}
+
+/* Inklapbaar Uitlogmenu */
+.user-dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 115%;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+  width: 220px;
+  padding: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+}
+
+.dropdown-header {
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-header strong { font-size: 0.88rem; color: #0f172a; }
+.dropdown-header small { font-size: 0.75rem; color: #64748b; }
+
+.user-dropdown-menu hr {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 0.4rem 0;
+}
+
+.dropdown-item {
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 0.6rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  width: 100%;
+}
+
+.dropdown-item:hover { background-color: #f1f5f9; }
+.logout-item { color: #dc2626; }
+.logout-item:hover { background-color: #fef2f2; }
+
+/* ==========================================
+   LOGIN / AUTHENTICATIE SCHERMEN
+   ========================================== */
+
+.login-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2.5rem 1rem;
+}
+
+.login-card {
+  background: #ffffff;
+  padding: 2.5rem;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  width: 100%;
+  max-width: 440px;
+}
+
+.login-card h2 {
+  margin-bottom: 0.5rem;
+  color: #051B35;
+  font-weight: 800;
+}
+
+.login-instruction {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  color: #334155;
+}
+
+.form-group input, 
+.form-group select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background-color: #ffffff;
+}
+
+.btn-primary {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover { background-color: #1d4ed8; }
+.btn-block { width: 100%; }
+
+.btn-secondary {
+  background-color: #e2e8f0;
+  color: #334155;
+  border: none;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-secondary:hover { background-color: #cbd5e1; }
+
+.auth-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.auth-footer a { color: #2563eb; text-decoration: none; font-weight: 700; }
+.auth-footer a:hover { text-decoration: underline; }
+
+/* ==========================================
+   DASHBOARD & ROOSTER PLANNER
+   ========================================== */
+
+.dashboard-wrapper {
+  padding: 1.5rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.admin-header-card {
+  background: #ffffff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  border-left: 6px solid #d97706;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-header-card h2 { color: #051B35; margin-bottom: 0.25rem; font-weight: 800; }
+.admin-header-card p { color: #64748b; font-size: 0.9rem; }
+
+/* Grid Layout voor Planner */
+.grid-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1.5rem;
+}
+
+.sidebar {
+  background: #ffffff;
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+}
+
+.sidebar h3 { font-size: 1.1rem; margin-bottom: 1rem; color: #051B35; font-weight: 800; }
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.activity-card {
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.85rem;
+  cursor: pointer;
+  background-color: #ffffff;
+  transition: all 0.2s;
+}
+
+.activity-card.selected {
+  border-color: #2563eb;
+  background-color: #eff6ff;
+}
+
+.activity-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.badge { width: 12px; height: 12px; border-radius: 3px; }
+.activity-title { font-weight: 700; font-size: 0.9rem; color: #0f172a; }
+.activity-details p { font-size: 0.8rem; color: #475569; }
+
+/* Rooster Tabel */
+.schedule-container {
+  background: #ffffff;
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+}
+
+.schedule-container h3 { font-size: 1.1rem; margin-bottom: 1rem; color: #051B35; font-weight: 800; }
+
+.table-responsive { overflow-x: auto; }
+
+.schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.schedule-table th, 
+.schedule-table td {
+  border: 1px solid #cbd5e1;
+  padding: 0.6rem;
+}
+
+.schedule-table th {
+  background-color: #f8fafc;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+  color: #0f172a;
+}
+
+.time-col {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #475569;
+  text-align: center;
+  width: 170px;
+  background-color: #f8fafc;
+}
+
+.slot-cell {
+  height: 60px;
+  width: 16%;
+  text-align: center;
+  vertical-align: middle;
+  position: relative;
+}
+
+.slot-cell.slot-open { cursor: pointer; }
+.slot-cell.slot-open:hover { background-color: #f1f5f9; }
+
+.slot-cell.slot-closed {
+  background-color: #f1f5f9;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.break-row { background-color: #e2e8f0; }
+.break-cell { text-align: center; font-weight: bold; color: #475569; font-size: 0.85rem; letter-spacing: 1px; }
+
+.selected-block {
+  color: white;
+  padding: 0.4rem;
+  border-radius: 6px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.block-title { font-weight: 700; font-size: 0.78rem; }
+.block-action { font-size: 0.65rem; opacity: 0.85; text-align: right; }
+
+/* Admin Tabellen */
+.admin-table-card {
+  background: #ffffff;
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  margin-bottom: 1.5rem;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-table th, 
+.admin-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.88rem;
+}
+
+.admin-table th {
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* Student Niveaugroepen Banner */
+.student-levels-banner {
+  background: #ffffff;
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  margin-bottom: 1.5rem;
+}
+
+.student-levels-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.level-card-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border-left: 5px solid #2563eb;
+  background-color: #f8fafc;
+}
+
+.vak-icon { font-size: 1.5rem; }
+.vak-name { font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase; }
+.vak-level { font-size: 0.95rem; font-weight: 800; color: #0f172a; }
+
+/* Meldingen */
+.alert {
+  padding: 0.9rem 1.2rem;
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.alert-danger { background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.alert-success { background-color: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }

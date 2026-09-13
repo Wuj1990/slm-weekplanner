@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2563eb">
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SLM Weekplanner</title>
+    <script type="module">
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js'
+      import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js'
+      
+      const firebaseConfig = {
+        projectId: "slm-weekplanner"
+      }
+
+      // Initialiseer Firebase en haal de actieve database (db) op
+      const app = initializeApp(firebaseConfig)
+      const db = getFirestore(app)
+      
+      // Maak de db én alle SDK-helpers beschikbaar op window.FirebaseDB
+      window.FirebaseDB = { db, collection, onSnapshot, doc, getDoc, setDoc, deleteDoc }
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
