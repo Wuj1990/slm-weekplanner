@@ -269,9 +269,23 @@ const exportStudentPDF = () => {
             </button>
             <div class="week-picker-wrapper">
               <label>Schoolweek:</label>
-              <select :value="selectedWeek" @change="emit('update:selectedWeek', $event.target.value)" class="week-select-dropdown">
-                <option v-for="w in availableWeeks" :key="w.id" :value="w.id">{{ w.label }}</option>
+              
+              <!-- BEHEERDER: Kan vrij schakelen tussen alle weken -->
+              <select 
+                v-if="currentUser.isAdmin" 
+                :value="selectedWeek" 
+                @change="emit('update:selectedWeek', $event.target.value)" 
+                class="week-select-dropdown"
+              >
+                <option v-for="w in availableWeeks" :key="w.id || w" :value="w.id || w">
+                  {{ w.label || w }}
+                </option>
               </select>
+
+              <!-- LEERLING: Ziet enkel vast de actieve week voor de veiligheid -->
+              <span v-else class="current-week-badge">
+                🔒 {{ availableWeeks.find(w => (w.id || w) === selectedWeek)?.label || selectedWeek }}
+              </span>
             </div>
           </div>
         </div>
@@ -453,6 +467,20 @@ const exportStudentPDF = () => {
   margin-top: 0.15rem;
   line-height: 1.3;
   word-break: break-word;
+}
+
+/* Veilige badge voor actieve week leerling */
+.current-week-badge {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 /* Overige stijlen */
