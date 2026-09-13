@@ -5,7 +5,8 @@ import { addActivityToFirebase } from '../firebase'
 const props = defineProps({
   activities: { type: Array, default: () => [] },
   selectedWeek: { type: String, default: '' },
-  availableWeeks: { type: Array, default: () => [] }
+  availableWeeks: { type: Array, default: () => [] },
+  currentWeek: { type: String, default: '' }
 })
 
 const emit = defineEmits(['add-activity', 'update-activity', 'delete-activity', 'update:selectedWeek'])
@@ -85,7 +86,7 @@ const handleUpdate = (act) => {
           <select v-model="newWeek" class="input-field">
             <option value="Alle weken">📅 Alle weken (Algemeen)</option>
             <option v-for="wk in availableWeeks" :key="wk.id || wk" :value="wk.id || wk">
-              {{ wk.label || wk }}
+              {{ wk.label || wk }} {{ (wk.id || wk) === currentWeek ? '⭐ (huidige week)' : '' }}
             </option>
           </select>
         </div>
@@ -140,7 +141,7 @@ const handleUpdate = (act) => {
       </form>
     </section>
 
-    <!-- BESTAANDE ONDERDELEN BEHEREN (GEFILTERD OP DE GEKOZEN DOELWEEK) -->
+    <!-- BESTAANDE ONDERDELEN BEHEREN -->
     <section class="admin-card">
       <h3>📋 Onderdelen in {{ newWeek }}</h3>
 
@@ -168,7 +169,7 @@ const handleUpdate = (act) => {
                 <select v-model="act.week" class="table-select" @change="handleUpdate(act)">
                   <option value="Alle weken">Alle weken</option>
                   <option v-for="wk in availableWeeks" :key="wk.id || wk" :value="wk.id || wk">
-                    {{ wk.label || wk }}
+                    {{ wk.label || wk }} {{ (wk.id || wk) === currentWeek ? '⭐ (huidige week)' : '' }}
                   </option>
                 </select>
               </td>

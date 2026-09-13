@@ -252,6 +252,7 @@ watch(selectedWeek, val => localStorage.setItem('slm_selectedWeek', JSON.stringi
         v-if="currentUser.isAdmin && activeTab === 'activities_manage'" 
         :activities="activities" 
         :available-weeks="availableWeeks" 
+        :current-week="currentWeek"
         v-model:selected-week="selectedWeek" 
         @add-activity="async (a) => { 
           try { 
@@ -303,7 +304,7 @@ watch(selectedWeek, val => localStorage.setItem('slm_selectedWeek', JSON.stringi
         @delete-user="handleDeleteUser" 
       />
 
-      <!-- NIEUW: Voortgang per leerling overzicht -->
+      <!-- Voortgang per leerling overzicht -->
       <StudentProgress 
         v-else-if="currentUser.isAdmin && activeTab === 'student_progress'" 
         :registered-users="registeredUsers" 
