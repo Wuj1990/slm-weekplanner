@@ -1,15 +1,17 @@
 <!-- src/App.vue -->
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, defineAsyncComponent } from 'vue'
 import Header from './components/Header.vue'
 import AuthView from './components/AuthView.vue'
-import AdminManage from './components/AdminManage.vue'
-import AdminOverview from './components/AdminOverview.vue'
-import AdminUsers from './components/AdminUsers.vue'
-import AdminHistory from './components/AdminHistory.vue'
-import StudentProgress from './components/StudentProgress.vue'
-import SchedulePlanner from './components/SchedulePlanner.vue'
-import AdminPrintCredentials from './components/AdminPrintCredentials.vue'
+
+// LAZY LOADING: Beheerscherm-componenten worden pas ingeladen wanneer je er naartoe navigeert (versnelt de app aanzienlijk)
+const AdminManage = defineAsyncComponent(() => import('./components/AdminManage.vue'))
+const AdminOverview = defineAsyncComponent(() => import('./components/AdminOverview.vue'))
+const AdminUsers = defineAsyncComponent(() => import('./components/AdminUsers.vue'))
+const AdminHistory = defineAsyncComponent(() => import('./components/AdminHistory.vue'))
+const StudentProgress = defineAsyncComponent(() => import('./components/StudentProgress.vue'))
+const SchedulePlanner = defineAsyncComponent(() => import('./components/SchedulePlanner.vue'))
+const AdminPrintCredentials = defineAsyncComponent(() => import('./components/AdminPrintCredentials.vue'))
 
 import { useAutoLogout } from './composables/useAutoLogout'
 import { getSchoolWeeksList } from './utils/dateUtils'
@@ -38,7 +40,7 @@ const authView = ref('home')
 const authError = ref('')
 const authSuccess = ref('')
 
-// Start altijd automatisch op de actuele schoolweek van vandaag (geen oude cache meer)
+// Start altijd automatisch op de actuele schoolweek van vandaag
 const selectedWeek = ref(currentWeek)
 
 // Beveiliging: als een niet-beheerder een admin-tab probeert te openen, direct terugzetten naar planner
@@ -194,7 +196,6 @@ const handleUpdateUserProfile = async (updatedUser) => {
 }
 
 watch(currentUser, val => val ? localStorage.setItem('slm_currentUser', JSON.stringify(val)) : localStorage.removeItem('slm_currentUser'))
-// We slaan selectedWeek niet meer op in localStorage zodat hij altijd netjes op het heden start
 </script>
 
 <template>
