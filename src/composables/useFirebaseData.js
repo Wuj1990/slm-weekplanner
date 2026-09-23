@@ -17,6 +17,7 @@ export function useFirebaseData(currentUser) {
       return
     }
 
+    // Veiligheidstimer zodat de laadscherm-overlay nooit oneindig blijft hangen bij trage netwerken
     const safetyTimeout = setTimeout(() => {
       if (isLoading.value) {
         isLoading.value = false
@@ -32,31 +33,53 @@ export function useFirebaseData(currentUser) {
       }
     }
 
-    onSnapshot(collection(db, 'reservations'), s => {
-      allDatabaseReservations.value = s.docs.map(d => ({ id: d.id, ...d.data() }))
-      checkAllLoaded()
-    }, () => checkAllLoaded())
+    try {
+      // 1. Reserveringen luisteraar
+      onSnapshot(collection(db, 'reservations'), s => {
+        allDatabaseReservations.value = s.docs.map(d => ({ id: d.id, ...d.data() }))
+        checkAllLoaded()
+      }, (err) => {
+        console.error('Fout bij ophalen reserveringen:', err)
+        checkAllLoaded()
+      })
 
-    onSnapshot(collection(db, 'activities'), s => {
-      activities.value = s.docs.map(d => ({ id: d.id, ...d.data() }))
-      checkAllLoaded()
-    }, () => checkAllLoaded())
+      // 2. Activiteiten luisteraar
+      onSnapshot(collection(db, 'activities'), s => {
+        activities.value = s.docs.map(d => ({ id: d.id, ...d.data() }))
+        checkAllLoaded()
+      }, (err) => {
+        console.error('Fout bij ophalen activiteiten:', err)
+        checkAllLoaded()
+      })
 
-    onSnapshot(collection(db, 'users'), s => {
-      registeredUsers.value = s.docs.map(d => ({ ...d.data() }))
-      if (currentUser.value && !currentUser.value.isAdmin) {
-        const latestMe = registeredUsers.value.find(u => u.email?.toLowerCase().trim() === currentUser.value.email?.toLowerCase().trim())
-        if (latestMe) {
-          currentUser.value = latestMe
+      // 3. Gebruikers luisteraar met automatische synchronisatie van ingelogde gebruiker
+      onSnapshot(collection(db, 'users'), s => {
+        registeredUsers.value = s.docs.map(d => ({ ...d.data() }))
+        if (currentUser.value && !currentUser.value.isAdmin) {
+          const latestMe = registeredUsers.value.find(u => u.email?.toLowerCase().trim() === currentUser.value.email?.toLowerCase().trim())
+          if (latestMe) {
+            currentUser.value = latestMe
+          }
         }
-      }
-      checkAllLoaded()
-    }, () => checkAllLoaded())
+        checkAllLoaded()
+      }, (err) => {
+        console.error('Fout bij ophalen gebruikers:', err)
+        checkAllLoaded()
+      })
 
-    onSnapshot(collection(db, 'mandatory'), s => {
-      mandatoryBlocks.value = s.docs.map(d => ({ id: d.id, ...d.data() }))
-      checkAllLoaded()
-    }, () => checkAllLoaded())
+      // 4. Verplichte blokken luisteraar
+      onSnapshot(collection(db, 'mandatory'), s => {
+        mandatoryBlocks.value = s.docs.map(d => ({ id: d.id, ...d.data() }))
+        checkAllLoaded()
+      }, (err) => {
+        console.error('Fout bij ophalen verplichte blokken:', err)
+        checkAllLoaded()
+      })
+
+    } catch (error) {
+      console.error('Kritieke fout in useFirebaseData:', error)
+      isLoading.value = false
+    }
   })
 
   return {
