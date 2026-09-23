@@ -9,6 +9,7 @@ import AdminUsers from './components/AdminUsers.vue'
 import AdminHistory from './components/AdminHistory.vue'
 import StudentProgress from './components/StudentProgress.vue'
 import SchedulePlanner from './components/SchedulePlanner.vue'
+import AdminPrintCredentials from './components/AdminPrintCredentials.vue'
 
 import { useAutoLogout } from './composables/useAutoLogout'
 import { getSchoolWeeksList } from './utils/dateUtils'
@@ -38,7 +39,6 @@ const authError = ref('')
 const authSuccess = ref('')
 const selectedWeek = ref(loadStorage('slm_selectedWeek', currentWeek))
 
-// Haal alle databasedata op via onze nieuwe schone composable
 const { 
   allDatabaseReservations, 
   activities, 
@@ -203,7 +203,6 @@ watch(selectedWeek, val => localStorage.setItem('slm_selectedWeek', JSON.stringi
         v-if="currentUser.isAdmin && activeTab === 'activities_manage'" 
         :activities="activities" 
         :available-weeks="availableWeeks" 
-        :current-week="currentWeek"
         v-model:selected-week="selectedWeek" 
         @add-activity="async (a) => { 
           try { 
@@ -260,6 +259,11 @@ watch(selectedWeek, val => localStorage.setItem('slm_selectedWeek', JSON.stringi
         :registered-users="registeredUsers" 
         :activities="activities" 
         @update-user="handleUpdateUserAndSync" 
+      />
+
+      <AdminPrintCredentials 
+        v-else-if="currentUser.isAdmin && activeTab === 'print_credentials'" 
+        :registered-users="registeredUsers" 
       />
 
       <SchedulePlanner v-else :current-user="currentUser" :activities="activities" :all-database-reservations="allDatabaseReservations" :mandatory-blocks="mandatoryBlocks" :available-weeks="availableWeeks" v-model:selected-week="selectedWeek" @toggle-slot="handleToggleSlot" @save-mandatory="(b) => { saveMandatoryBlock(b); showToast('Lesuur instelling opgeslagen!'); }" @remove-mandatory="(b) => { removeMandatoryBlock(b); showToast('Instelling gewist.'); }" @update-user-profile="handleUpdateUserProfile" />

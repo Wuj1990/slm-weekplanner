@@ -1,3 +1,4 @@
+<!-- src/components/Header.vue -->
 <script setup>
 import { ref } from 'vue'
 
@@ -37,6 +38,7 @@ const handleLogout = () => {
         <option value="history">📜 Weken Historie (Admin)</option>
         <option value="users">👥 Leerlingen & Niveaus</option>
         <option value="student_progress">📈 Voortgang per leerling</option>
+        <option value="print_credentials">🔑 Inloggegevens Printen</option>
       </select>
     </div>
 
