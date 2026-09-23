@@ -33,6 +33,9 @@ const showFirstLoginModal = ref(false)
 const firstNameInput = ref('')
 const lastNameInput = ref('')
 
+// Dubbelklik-beveiliging / cooldown state
+const isBusy = ref(false)
+
 onMounted(() => {
   if (props.currentUser && !props.currentUser.isAdmin) {
     const hasFirst = props.currentUser.firstName?.trim()
@@ -166,8 +169,9 @@ const validateBooking = (day, slotLabel) => {
   return true
 }
 
-const handleSlotClick = (day, slotObj) => {
+const handleSlotClick = async (day, slotObj) => {
   if (slotObj.isBreak) return
+  if (isBusy.value) return // Voorkom dubbele kliks en dubbele verzoeken naar Firebase
   if (!filteredActivities.value || filteredActivities.value.length === 0) return
   if (props.currentUser.isAdmin) return openMandatoryModal(day, slotObj.label)
   if (getMandatoryForSlot(day, slotObj.label)) return
@@ -177,7 +181,14 @@ const handleSlotClick = (day, slotObj) => {
 
   if (!selectedActivity.value) return
 
-  emit('toggle-slot', { day, slotObj, selectedActivity: selectedActivity.value })
+  isBusy.value = true
+  try {
+    await emit('toggle-slot', { day, slotObj, selectedActivity: selectedActivity.value })
+  } finally {
+    setTimeout(() => {
+      isBusy.value = false
+    }, 350) // Korte cooldown van 350ms
+  }
 }
 
 const exportStudentPDF = () => {
