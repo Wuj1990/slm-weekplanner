@@ -83,7 +83,27 @@ html.dark-mode body {
   color: #f8fafc !important;
 }
 
-html.dark-mode .navbar-white,
+/* Navigatiebalk zichtbaarheid hersteld in Dark Mode */
+html.dark-mode .navbar-white {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+html.dark-mode .navbar-white h1,
+html.dark-mode .navbar-white .dropdown-label,
+html.dark-mode .navbar-white .user-name {
+  color: #f8fafc !important;
+}
+
+html.dark-mode .nav-dropdown-select,
+html.dark-mode .user-pill,
+html.dark-mode .btn-dark-toggle {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #475569 !important;
+}
+
 html.dark-mode .sidebar,
 html.dark-mode .schedule-container,
 html.dark-mode .admin-table-card,
