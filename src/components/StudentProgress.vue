@@ -1,3 +1,4 @@
+<!-- src/components/StudentProgress.vue -->
 <script setup>
 import { ref, computed } from 'vue'
 
@@ -11,9 +12,18 @@ const emit = defineEmits(['update-user'])
 const searchQuery = ref('')
 const selectedStudentEmail = ref('')
 
-// Filter enkel niet-admin gebruikers (leerlingen)
+// Filter enkel niet-admin gebruikers (leerlingen) en zorg dat elk e-mailadres uniek is
 const students = computed(() => {
-  return props.registeredUsers.filter(u => !u.isAdmin)
+  const map = new Map()
+  props.registeredUsers.forEach(u => {
+    if (!u.isAdmin && u.email) {
+      const cleanEmail = u.email.toLowerCase().trim()
+      if (!map.has(cleanEmail)) {
+        map.set(cleanEmail, u)
+      }
+    }
+  })
+  return Array.from(map.values())
 })
 
 const filteredStudents = computed(() => {
@@ -28,7 +38,7 @@ const filteredStudents = computed(() => {
 // Als er nog geen leerling is geselecteerd, kies automatisch de eerste indien beschikbaar
 const currentStudent = computed(() => {
   if (filteredStudents.value.length === 0) return null
-  const found = filteredStudents.value.find(s => s.email === selectedStudentEmail.value)
+  const found = filteredStudents.value.find(s => s.email?.toLowerCase().trim() === selectedStudentEmail.value?.toLowerCase().trim())
   return found || filteredStudents.value[0]
 })
 
@@ -65,7 +75,7 @@ const handleCompletionToggle = (user, activityId, event) => {
             v-for="student in filteredStudents" 
             :key="student.email" 
             class="student-item"
-            :class="{ 'active': currentStudent?.email === student.email }"
+            :class="{ 'active': currentStudent?.email?.toLowerCase().trim() === student.email?.toLowerCase().trim() }"
             @click="selectedStudentEmail = student.email"
           >
             <div class="student-avatar">{{ student.name ? student.name.charAt(0).toUpperCase() : 'L' }}</div>
