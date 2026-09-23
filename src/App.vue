@@ -37,7 +37,17 @@ const activeTab = ref('planner')
 const authView = ref('home')
 const authError = ref('')
 const authSuccess = ref('')
-const selectedWeek = ref(loadStorage('slm_selectedWeek', currentWeek))
+
+// Start altijd automatisch op de actuele schoolweek van vandaag (geen oude cache meer)
+const selectedWeek = ref(currentWeek)
+
+// Beveiliging: als een niet-beheerder een admin-tab probeert te openen, direct terugzetten naar planner
+watch(activeTab, (newTab) => {
+  const adminTabs = ['activities_manage', 'admin', 'history', 'users', 'student_progress', 'print_credentials']
+  if (adminTabs.includes(newTab) && (!currentUser.value || !currentUser.value.isAdmin)) {
+    activeTab.value = 'planner'
+  }
+})
 
 const { 
   allDatabaseReservations, 
@@ -184,7 +194,7 @@ const handleUpdateUserProfile = async (updatedUser) => {
 }
 
 watch(currentUser, val => val ? localStorage.setItem('slm_currentUser', JSON.stringify(val)) : localStorage.removeItem('slm_currentUser'))
-watch(selectedWeek, val => localStorage.setItem('slm_selectedWeek', JSON.stringify(val)))
+// We slaan selectedWeek niet meer op in localStorage zodat hij altijd netjes op het heden start
 </script>
 
 <template>

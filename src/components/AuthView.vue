@@ -1,7 +1,8 @@
+<!-- src/components/AuthView.vue -->
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
-defineProps({
+const props = defineProps({
   authView: { type: String, default: 'login' },
   authError: { type: String, default: '' },
   authSuccess: { type: String, default: '' }
@@ -18,15 +19,55 @@ const regEmail = ref('')
 const regPassword = ref('')
 const regConfirmPassword = ref('')
 
+const localError = ref('')
+
+// Brute-force bescherming state
+const failedAttempts = ref(0)
+const lockoutSeconds = ref(0)
+let lockoutTimer = null
+
+const isLockedOut = computed(() => lockoutSeconds.value > 0)
+
+const triggerLockout = () => {
+  lockoutSeconds.value = 30
+  if (lockoutTimer) clearInterval(lockoutTimer)
+  lockoutTimer = setInterval(() => {
+    lockoutSeconds.value--
+    if (lockoutSeconds.value <= 0) {
+      clearInterval(lockoutTimer)
+      failedAttempts.value = 0
+    }
+  }, 1000)
+}
+
 const handleLoginSubmit = () => {
+  if (isLockedOut.value) return
+  localError.value = ''
+
   emit('login', { email: loginEmail.value, password: loginPassword.value })
 }
 
 const handleRegisterSubmit = () => {
+  localError.value = ''
+
+  // Sterk wachtwoordbeleid: minstens 6 tekens, minstens 1 letter en 1 cijfer
+  const hasLetter = /[a-zA-Z]/.test(regPassword.value)
+  const hasNumber = /[0-9]/.test(regPassword.value)
+
+  if (regPassword.value.length < 6 || !hasLetter || !hasNumber) {
+    localError.value = '⚠️ Wachtwoord moet minimaal 6 tekens lang zijn en zowel letters als cijfers bevatten.'
+    return
+  }
+
+  if (regPassword.value !== regConfirmPassword.value) {
+    localError.value = '⚠️ De ingevoerde wachtwoorden komen niet overeen.'
+    return
+  }
+
   emit('register', {
-    firstName: regFirstName.value,
-    lastName: regLastName.value,
-    email: regEmail.value,
+    firstName: regFirstName.value.trim(),
+    lastName: regLastName.value.trim(),
+    email: regEmail.value.trim().toLowerCase(),
     password: regPassword.value,
     confirmPassword: regConfirmPassword.value
   })
@@ -36,7 +77,7 @@ const handleRegisterSubmit = () => {
 <template>
   <div class="auth-container">
     <div class="auth-card">
-      <div v-if="authError" class="alert alert-danger">{{ authError }}</div>
+      <div v-if="authError || localError" class="alert alert-danger">{{ authError || localError }}</div>
       <div v-if="authSuccess" class="alert alert-success">{{ authSuccess }}</div>
 
       <!-- INLOGGEN -->
@@ -47,15 +88,17 @@ const handleRegisterSubmit = () => {
         <form @submit.prevent="handleLoginSubmit" class="auth-form">
           <div class="form-group">
             <label>School E-mailadres:</label>
-            <input v-model="loginEmail" type="email" placeholder="naam@leerling.be" required class="input-field" />
+            <input v-model="loginEmail" type="email" placeholder="naam@leerling.be" required class="input-field" :disabled="isLockedOut" />
           </div>
 
           <div class="form-group">
             <label>Wachtwoord:</label>
-            <input v-model="loginPassword" type="password" placeholder="••••••••" required class="input-field" />
+            <input v-model="loginPassword" type="password" placeholder="••••••••" required class="input-field" :disabled="isLockedOut" />
           </div>
 
-          <button type="submit" class="btn-primary full-width">Inloggen</button>
+          <button type="submit" class="btn-primary full-width" :disabled="isLockedOut">
+            {{ isLockedOut ? `Tijdelijk geblokkeerd (${lockoutSeconds}s)` : 'Inloggen' }}
+          </button>
         </form>
 
         <div class="auth-footer">
@@ -88,8 +131,9 @@ const handleRegisterSubmit = () => {
           </div>
 
           <div class="form-group">
-            <label>Wachtwoord (min. 6 tekens):</label>
+            <label>Wachtwoord:</label>
             <input v-model="regPassword" type="password" placeholder="••••••••" required class="input-field" />
+            <small class="hint-text">Min. 6 tekens, inclusief letters en cijfers.</small>
           </div>
 
           <div class="form-group">
@@ -180,6 +224,11 @@ h2 {
   border-color: #2563eb;
 }
 
+.hint-text {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
 .btn-primary {
   background: #2563eb;
   color: white;
@@ -194,6 +243,11 @@ h2 {
 
 .btn-primary:hover {
   background: #1d4ed8;
+}
+
+.btn-primary:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
 }
 
 .full-width {
