@@ -1,4 +1,3 @@
-// vite.config.js
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
@@ -7,14 +6,8 @@ export default defineConfig({
   plugins: [vue()],
   build: {
     target: 'esnext',
-    minify: 'terser',
+    minify: 'esbuild', // Gebruikt de ingebouwde snelle minifier van Vite
     chunkSizeWarningLimit: 1000,
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true
-      }
-    },
     rollupOptions: {
       output: {
         manualChunks(id) {
