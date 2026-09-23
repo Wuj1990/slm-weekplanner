@@ -118,9 +118,12 @@ const handleUpdate = (act) => {
 
         <div class="form-group">
           <label>🔗 Vereiste Voorgaande Opdracht:</label>
+          <!-- Aangepast naar props.activities zodat je uit ALLE weken kunt kiezen -->
           <select v-model="newPrerequisiteId" class="input-field">
             <option value="">-- Geen voorwaarde --</option>
-            <option v-for="act in filteredActivities" :key="act.id" :value="act.id">{{ act.name }}</option>
+            <option v-for="act in props.activities" :key="act.id" :value="act.id">
+              {{ act.name }} ({{ act.week || 'Algemeen' }})
+            </option>
           </select>
         </div>
 
@@ -185,10 +188,11 @@ const handleUpdate = (act) => {
                 <input v-model.number="act.maxHours" type="number" min="1" class="table-input number-input" @change="handleUpdate(act)" />
               </td>
               <td>
+                <!-- Aangepast naar props.activities zodat je in de tabel ook onderdelen uit andere weken kunt koppelen -->
                 <select v-model="act.prerequisiteId" class="table-select" @change="handleUpdate(act)">
                   <option value="">-- Geen voorwaarde --</option>
-                  <option v-for="other in filteredActivities.filter(a => String(a.id) !== String(act.id))" :key="other.id" :value="other.id">
-                    {{ other.name }}
+                  <option v-for="other in props.activities.filter(a => String(a.id) !== String(act.id))" :key="other.id" :value="other.id">
+                    {{ other.name }} ({{ other.week || 'Algemeen' }})
                   </option>
                 </select>
               </td>
