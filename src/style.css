@@ -67,3 +67,69 @@ body {
   flex-wrap: wrap;
   gap: 1rem;
 }
+
+
+/* ==========================================
+   DARK MODE / DONKERE MODUS STYLING
+   ========================================== */
+
+html.dark-mode {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+html.dark-mode body {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+html.dark-mode .navbar-white,
+html.dark-mode .sidebar,
+html.dark-mode .schedule-container,
+html.dark-mode .admin-table-card,
+html.dark-mode .admin-header-card,
+html.dark-mode .student-levels-banner,
+html.dark-mode .hours-counter-banner,
+html.dark-mode .modal-card,
+html.dark-mode .level-card-item,
+html.dark-mode .activity-card {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+html.dark-mode .schedule-table th,
+html.dark-mode .time-col,
+html.dark-mode .clean-table th {
+  background-color: #0f172a !important;
+  color: #cbd5e1 !important;
+  border-color: #334155 !important;
+}
+
+html.dark-mode .schedule-table td,
+html.dark-mode .clean-table td {
+  border-color: #334155 !important;
+}
+
+html.dark-mode input,
+html.dark-mode select,
+html.dark-mode textarea {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #475569 !important;
+}
+
+html.dark-mode .slot-open:hover {
+  background-color: #334155 !important;
+}
+
+html.dark-mode .break-row {
+  background-color: #0f172a !important;
+}
+
+html.dark-mode .code-badge,
+html.dark-mode .week-picker-wrapper {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}

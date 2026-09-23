@@ -33,8 +33,8 @@ const showFirstLoginModal = ref(false)
 const firstNameInput = ref('')
 const lastNameInput = ref('')
 
-// Dubbelklik-beveiliging / cooldown state
-const isBusy = ref(false)
+// Dubbelklik-beveiliging & slot-specifieke laadstatussen
+const busySlots = ref(new Set())
 
 onMounted(() => {
   if (props.currentUser && !props.currentUser.isAdmin) {
@@ -82,6 +82,16 @@ const getSlotOccupancy = (day, slotLabel, activityId) => {
     String(r.activityId).trim() === String(activityId).trim()
   ).length
 }
+
+// Live berekening van het aantal geboekte uren in de huidige week voor de leerling
+const currentWeekTotalHours = computed(() => {
+  if (!props.currentUser || props.currentUser.isAdmin) return 0
+  const userEmail = props.currentUser.email.toLowerCase().trim()
+  return props.allDatabaseReservations.filter(r => 
+    r.userEmail?.toLowerCase().trim() === userEmail && 
+    String(r.week).trim() === String(props.selectedWeek).trim()
+  ).length
+})
 
 const handleCopyPreviousWeek = () => {
   const currentIndex = props.availableWeeks.findIndex(w => String(w.id || w) === String(props.selectedWeek))
@@ -171,23 +181,24 @@ const validateBooking = (day, slotLabel) => {
 
 const handleSlotClick = async (day, slotObj) => {
   if (slotObj.isBreak) return
-  if (isBusy.value) return // Voorkom dubbele kliks en dubbele verzoeken naar Firebase
   if (!filteredActivities.value || filteredActivities.value.length === 0) return
   if (props.currentUser.isAdmin) return openMandatoryModal(day, slotObj.label)
   if (getMandatoryForSlot(day, slotObj.label)) return
 
+  const slotKey = `${day}-${slotObj.label}`
+  if (busySlots.value.has(slotKey)) return // Voorkom dubbelklik tijdens laden
+
   const existing = getReservationForSlot(day, slotObj.label)
   if (!existing && !validateBooking(day, slotObj.label)) return
-
   if (!selectedActivity.value) return
 
-  isBusy.value = true
+  busySlots.value.add(slotKey)
   try {
     await emit('toggle-slot', { day, slotObj, selectedActivity: selectedActivity.value })
   } finally {
     setTimeout(() => {
-      isBusy.value = false
-    }, 350) // Korte cooldown van 350ms
+      busySlots.value.delete(slotKey)
+    }, 350)
   }
 }
 
@@ -241,6 +252,17 @@ const exportStudentPDF = () => {
 
 <template>
   <main class="dashboard-wrapper">
+    <!-- LIVE URENTELLER VOOR LEERLINGEN -->
+    <div v-if="!currentUser.isAdmin" class="hours-counter-banner">
+      <div class="counter-text">
+        <span>📊 Voortgang deze week:</span>
+        <strong>{{ currentWeekTotalHours }} / 8 uur ingepland</strong>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" :style="{ width: Math.min((currentWeekTotalHours / 8) * 100, 100) + '%' }"></div>
+      </div>
+    </div>
+
     <div v-if="!currentUser.isAdmin && currentUser.levelGroups" class="student-levels-banner">
       <h3>Jouw Niveaugroepen</h3>
       <div class="student-levels-grid">
@@ -334,10 +356,16 @@ const exportStudentPDF = () => {
                     v-for="day in days" 
                     :key="day" 
                     class="slot-cell"
-                    :class="{ 'slot-open': filteredActivities.length > 0 }"
+                    :class="{ 
+                      'slot-open': filteredActivities.length > 0, 
+                      'slot-loading': busySlots.has(`${day}-${slotObj.label}`) 
+                    }"
                     @click="handleSlotClick(day, slotObj)"
                   >
-                    <template v-if="getMandatoryForSlot(day, slotObj.label)?.targetLevelGroup === 'BLOCKED_PRACTICE'">
+                    <div v-if="busySlots.has(`${day}-${slotObj.label}`)" class="slot-spinner-overlay">
+                      <div class="mini-spinner"></div>
+                    </div>
+                    <template v-else-if="getMandatoryForSlot(day, slotObj.label)?.targetLevelGroup === 'BLOCKED_PRACTICE'">
                       <div class="blocked-practice-block">🔒 Praktijk<br><small>(Niet beschikbaar)</small></div>
                     </template>
                     <template v-else-if="getMandatoryForSlot(day, slotObj.label) && getActivityById(getMandatoryForSlot(day, slotObj.label).activityId)">
@@ -426,6 +454,58 @@ const exportStudentPDF = () => {
 </template>
 
 <style scoped>
+.hours-counter-banner {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.counter-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: #2563eb;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+.slot-loading {
+  position: relative;
+  background-color: #f1f5f9 !important;
+  pointer-events: none;
+}
+.slot-spinner-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+.mini-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #cbd5e1;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .student-levels-banner {
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -534,7 +614,7 @@ const exportStudentPDF = () => {
 .schedule-table th { background-color: #f8fafc; padding: 0.75rem 0.5rem; font-size: 0.88rem; font-weight: 700; color: #1e293b; }
 .time-header { width: 150px; }
 .time-col { font-size: 0.78rem; font-weight: 700; color: #475569; background-color: #f8fafc; padding: 0.5rem; white-space: nowrap; }
-.slot-cell { height: 62px; padding: 0.3rem; transition: background-color 0.15s ease; }
+.slot-cell { height: 62px; padding: 0.3rem; transition: background-color 0.15s ease; position: relative; }
 .slot-open:hover { background-color: #f1f5f9; cursor: pointer; }
 .text-muted-empty { color: #94a3b8; font-size: 0.8rem; font-weight: 600; line-height: 1.3; }
 .blocked-practice-block { color: #475569; font-size: 0.75rem; font-weight: 700; background: #f1f5f9; padding: 0.35rem; border-radius: 6px; border: 1px dashed #cbd5e1; line-height: 1.2; }
